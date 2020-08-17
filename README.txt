@@ -1,4 +1,4 @@
-This python package is an implementation of low-dimensional energy balance models.
+This python package is an implementation of Zero to One dimensional Earth Energy balance models.
 
 It shall serves as a framework to compile and simulate energy balance models from a collection of parameterizations which describe the energy transport of reduced/simplified earth system.
 

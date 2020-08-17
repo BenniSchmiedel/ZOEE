@@ -9,12 +9,12 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.txt'), encoding='utf-8') as f:
     long_description = f.read()
 
-setuptools.setup(name='lowEBMs',
-      version='1.0',
-      description='A python implementation of low-dimensional EBMs',
+setuptools.setup(name='ZOEE',
+      version='0.1',
+      description='A python implementation of Zero to One dimensional Earth Energy balance models',
       long_description=long_description,
       long_description_content_type='text/plain',
-      url='https://github.com/BenniSchmiedel/Low-dimensional-EBMs',
+      url='https://github.com/BenniSchmiedel/ZOEE',
       author='Benjamin Schmiedel',
       license='MIT',
       packages=setuptools.find_packages(),
