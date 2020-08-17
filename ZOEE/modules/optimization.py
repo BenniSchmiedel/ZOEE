@@ -248,40 +248,40 @@ class optimization:
         self.ZMT_initial, self.GMT_initial = data_CTRL[0][-1], data_CTRL[1][-1]
 
         # Check dimension
-        if np.shape(data_CTRL[1]) != (self.num_paras, self.num_data):
-            raise Exception("GMT output from " + str(model) + " in CTRL should have shape (len(parameters) ,\
-             len(datapoints)) but instead has" + str(np.shape(data_CTRL[1])))
-        if np.shape(data_CTRL[0]) != (self.num_paras, len(self.grid)):
-            raise Exception("ZMT output from " + str(model) + " in CTRL should have shape (len(parameters) ,\
-             len(grid)) but instead has" + str(np.shape(data_CTRL[0])))
+        if np.shape(data_CTRL[1][-1]) != (self.parallels,):
+            raise Exception("GMT output from " + str(model) + " in CTRL should have shape (len(parallels), ) \
+             but instead has" + str(np.shape(data_CTRL[1][-1])))
+        if np.shape(data_CTRL[0][-1]) != (self.parallels, len(self.grid)):
+            raise Exception("ZMT output from " + str(model) + " in CTRL should have shape (len(parallels) ,\
+             len(grid)) but instead has" + str(np.shape(data_CTRL[0][-1])))
 
         # Then run full simulation with new parameter set
         # control = False
-        # if self.mode == 'Coupled' or self.mode == 'GMT':
-        # if not control and self.current_step == 0:
-        #    ZMT = np.tile(self.ZMT_initial, (self.parallels, 1))
-        #    GMT = np.tile(self.GMT_initial, self.parallels)
-        data_FULL = model.run(model_config, P_config, self.mode, self.ZMT_initial, self.GMT_initial, control=False)
+        if self.mode == 'Coupled' or self.mode == 'GMT':
+            # if not control and self.current_step == 0:
+            #    ZMT = np.tile(self.ZMT_initial, (self.parallels, 1))
+            #    GMT = np.tile(self.GMT_initial, self.parallels)
+            data_FULL = model.run(model_config, P_config, self.mode, self.ZMT_initial, self.GMT_initial, control=False)
 
-        if np.shape(data_FULL[1]) != (self.num_paras, self.num_data):
-            raise Exception("GMT output from " + str(model) + " in FULL should have shape (len(parameters) ,\
-             len(datapoints)) but instead has" + str(np.shape(data_FULL[1])))
-        if np.shape(data_FULL[0]) != (self.num_paras, len(self.grid)):
-            raise Exception("ZMT output from " + str(model) + " in CTRL should have shape (len(parameters) ,\
-             len(grid)) but instead has" + str(np.shape(data_FULL[0])))
+            if np.shape(data_FULL[1]) != (self.num_data, self.parallels):
+                raise Exception("GMT output from " + str(model) + " in FULL should have shape (len(parallels) ,\
+                 len(datapoints)) but instead has" + str(np.shape(data_FULL[1])))
+            if np.shape(data_FULL[0][-1]) != (self.parallels, len(self.grid)):
+                raise Exception("ZMT output from " + str(model) + " in CTRL should have shape (len(parallels) ,\
+                 len(grid)) but instead has" + str(np.shape(data_FULL[0][-1])))
 
         # Output data
         if self.mode == 'ZMT':
             data_out = data_CTRL[0][-1]
         elif self.mode == 'GMT':
             if self.response:
-                data_out = np.transpose(np.transpose(data_FULL[1]) - data_FULL[1][:, 0])
+                data_out = np.transpose(np.transpose(data_FULL[1]) - data_FULL[1][0])
             else:
                 data_out = data_FULL[1]
         elif self.mode == 'Coupled':
             dataZMT = data_CTRL[0][-1]
             if self.response:
-                dataGMT = np.transpose(np.transpose(data_FULL[1]) - data_FULL[1][:, 0])
+                dataGMT = np.transpose(np.transpose(data_FULL[1]) - data_FULL[1][0])
             else:
                 dataGMT = data_FULL[1]
             data_out = [dataZMT, dataGMT]
