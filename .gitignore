@@ -3,10 +3,10 @@
 
 # Setuptools distribution folder.
 /dist/
-/lowEBMs(Backup 09.05)/
+
 
 # Python egg metadata, regenerated from source files by setuptools.
-/*.egg-info
+*.egg-info
 
 # More
 .ipynb_checkpoints

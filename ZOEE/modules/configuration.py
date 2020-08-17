@@ -233,9 +233,9 @@ def parameterimporter(filename,*args,**kwargs):
     
     #Importing the paras.ini from path
     if path == None:
-        possible_paths=['','config/Data/','../config/Data/']
+        possible_paths = ['', 'config/', '../config/']
         for i in sys.path:
-            possible_paths.append(i+'/ZOEE/tutorials/config/Data/')
+            possible_paths.append(i + '/ZOEE/tutorials/config/')
         for trypath in possible_paths:
             exists = os.path.isfile(trypath+filename)
             if exists:
