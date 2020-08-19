@@ -163,9 +163,9 @@ class Vars():
     AODTracker=[0,0]
     OrbitalTracker=[0,{'ecc': 0, 'long_peri': 0, 'obliquity': 0}]
     meridional=list
-    tempdif=list
-    TSI=float
-    AOD=float
+    tempdif = list
+    TSI = None
+    AOD = float
     
     ###Static variables###
     Lat=float

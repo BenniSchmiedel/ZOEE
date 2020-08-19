@@ -559,7 +559,7 @@ def add_sellersparameters(config,importer,file,transfernumber,downwardnumber,sol
         funcin['albedoparam'][0]=lna(Z)
         funcin['albedoparam'][1]=lna(b)
     if solar==True:
-        Vars.Solar=lna(Q)*1.327624658#1.2971#
+        Vars.solar = lna(Q) * 1.327624658  # 1.2971#
     configout=config
     configout['funccomp']['funcparam']['func'+str(transfernumber)]=funct
     configout['funccomp']['funcparam']['func'+str(downwardnumber)]=funcin

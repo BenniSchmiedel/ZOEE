@@ -176,6 +176,8 @@ class optimization:
 
             self.current_step += 1
 
+        if self.mode == 'Coupled':
+            dataout = [dataout_ZMT, dataout_GMT]
         return F, dF, P, Ptrans, gamma, dataout
 
     def target_comparison(self, data, mode, target):
@@ -241,9 +243,17 @@ class optimization:
         # if control:
         # model = model_name(model_setup)
         # First run control to determine initial temperature profile with the new parameter set
-        if self.current_step == 0:
+
+        if self.current_step == 0 and np.shape(self.ZMT_initial) != (self.parallels, len(self.grid)):
             self.ZMT_initial = np.tile(self.ZMT_initial, (self.parallels, 1))
+            if np.shape(self.ZMT_initial) != (self.parallels, len(self.grid)):
+                raise Exception('ZMT_initial shape not understood')
+
+        if self.current_step == 0 and np.shape(self.GMT_initial) != (self.parallels,):
             self.GMT_initial = np.tile(self.GMT_initial, self.parallels)
+            if np.shape(self.GMT_initial) != (self.parallels,):
+                raise Exception('GMT_initial shape not understood')
+
         data_CTRL = model.run(model_config, P_config, self.mode, self.ZMT_initial, self.GMT_initial, control=True)
         self.ZMT_initial, self.GMT_initial = data_CTRL[0][-1], data_CTRL[1][-1]
 
@@ -275,15 +285,15 @@ class optimization:
             data_out = data_CTRL[0][-1]
         elif self.mode == 'GMT':
             if self.response:
-                data_out = np.transpose(np.transpose(data_FULL[1]) - data_FULL[1][0])
+                data_out = np.transpose(data_FULL[1] - data_FULL[1][0])
             else:
-                data_out = data_FULL[1]
+                data_out = np.transpose(data_FULL[1])
         elif self.mode == 'Coupled':
             dataZMT = data_CTRL[0][-1]
             if self.response:
-                dataGMT = np.transpose(np.transpose(data_FULL[1]) - data_FULL[1][0])
+                dataGMT = np.transpose(data_FULL[1] - data_FULL[1][0])
             else:
-                dataGMT = data_FULL[1]
+                dataGMT = np.transpose(data_FULL[1])
             data_out = [dataZMT, dataGMT]
         elif self.mode == 'GMT_Single':
             data_out = data_CTRL[0][-1]
@@ -304,7 +314,7 @@ class optimization:
 class ZOEE_optimization:
     """ZOEE specific implementations to run the optimization"""
 
-    def __init__(self, num_params, mode, labels, levels, elevation, monthly=True):
+    def __init__(self, num_params, mode, labels, levels, elevation, elevation_values, monthly=True):
         self.parallel = True
         self.labels = labels
         self.levels = levels
@@ -312,6 +322,7 @@ class ZOEE_optimization:
         self.num_params = num_params
         self.mode = mode
         self.elevation = elevation
+        self.elevation_values = elevation_values
 
     def _overwrite_parameters(self, config, P_config):
 
@@ -338,6 +349,7 @@ class ZOEE_optimization:
     def run(self, config, P_config, mode, ZMT, GMT, control=False):
         from .variables import variable_importer, Vars
         from .rk4 import rk4alg
+        from .functions import cosd
 
         self.mode = mode
         parallel_config = {'number_of_parameters': self.num_params, 'number_of_cycles': 1,
@@ -349,6 +361,9 @@ class ZOEE_optimization:
 
         Vars.T, Vars.T_global = ZMT, GMT
         data = rk4alg(config, progressbar=True, monthly=self.monthly)
-        data_out = [data[1] + self.elevation, data[2]]
-
+        if self.elevation:
+            data_out = [data[1] + self.elevation_values,
+                        data[2][1:] + np.average(self.elevation_values, weights=cosd(Vars.Lat))]
+        else:
+            dataout = [data[1], data[2][1:]]
         return data_out

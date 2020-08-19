@@ -198,14 +198,18 @@ class flux_down:
         # Loading inputparameters
         Q, factor_solar, dQ, albedofunc, albedoread, albedofuncparam, noise, noiseamp, noisedelay, seed, seedmanipulation, solarinput, convfactor, timeunit, orbital, orbitalyear, updatefrequency = list_parameters  # R_ininsolalbedoparam
 
-        if Base.Runtime_Tracker == 0 and Vars.TSI == float:
-            Vars.TSI = 0
+        if Vars.TSI is None:
+            S = Q
+        else:
+            S = Vars.TSI
+
         if Base.Runtime_Tracker == 0 and Vars.AOD == float:
             Vars.AOD = 0
 
         if updatefrequency == 'number_of_integration':
             updatefrequency = Base.number_of_integration
         if Base.Runtime_Tracker % (4 * updatefrequency) == 0:
+
             if solarinput == True:
 
                 # with orbital variations (if False by default present day)
@@ -214,29 +218,29 @@ class flux_down:
 
                         Vars.Lat = np.linspace(-85, 85, 18)
 
-                        Q = earthsystem().solarradiation_orbital(convfactor, orbitalyear, 'annualmean', Q)
+                        Q = earthsystem().solarradiation_orbital(convfactor, orbitalyear, 'annualmean', S)
                         Vars.solar = np.average(Q, weights=cosd(Vars.Lat))
                     else:
-                        Vars.solar = earthsystem().solarradiation_orbital(convfactor, orbitalyear, timeunit, Q)
+                        Vars.solar = earthsystem().solarradiation_orbital(convfactor, orbitalyear, timeunit, S)
 
                 else:
                     if Base.spatial_resolution == 0:
 
                         Vars.Lat = np.linspace(-85, 85, 18)
                         # Q=earthsystem().solarradiation_self(convfactor,'annualmean',orbitalyear,Q)
-                        Q = earthsystem().solarradiation(convfactor, 'annualmean', orbitalyear, Q)
+                        Q = earthsystem().solarradiation(convfactor, 'annualmean', orbitalyear, S)
                         Vars.solar = np.average(Q, weights=cosd(Vars.Lat))
                     else:
                         # Vars.solar=earthsystem().solarradiation_self(convfactor,timeunit,orbitalyear,Q)
 
-                        Vars.solar = earthsystem().solarradiation(convfactor, timeunit, orbitalyear, Q)
+                        Vars.solar = earthsystem().solarradiation(convfactor, timeunit, orbitalyear, S)
 
             # total solar insolation with possible offset
             else:
-                Vars.solar = Q
+                Vars.solar = S
 
         if solarinput == False and Base.spatial_resolution == 0:
-            Q_total = Vars.solar + dQ + Vars.TSI
+            Q_total = Vars.solar + dQ
         else:
             Q_total = Vars.solar + dQ
         if Vars.AOD != 0:
@@ -2070,6 +2074,7 @@ class forcing:
 
         if Base.Runtime_Tracker == 0:
             Vars.TSI = Vars.SolarInput[1][0]
+            Vars.SolarTracker[1] = Vars.SolarInput[1][0]
         while Vars.t > Vars.SolarInput[0][Vars.SolarTracker[0]]:
             if Vars.SolarTracker[0] == (len(Vars.SolarInput[0]) - 1):
                 Vars.SolarTracker[1] = 0
@@ -2077,8 +2082,10 @@ class forcing:
             else:
                 Vars.SolarTracker[1] = Vars.SolarInput[1][Vars.SolarTracker[0]]
                 Vars.SolarTracker[0] += 1
+
         Vars.TSI = Vars.SolarTracker[1] * k_output + m_output
         if Base.Runtime_Tracker % (4 * Base.data_readout) == 0:
+
             Vars.SolarOutput[int(Base.Runtime_Tracker / (4 * Base.data_readout))] = Vars.TSI
         return 0
 
@@ -2131,7 +2138,7 @@ class earthsystem:
             GMT = np.average(Vars.T, weights=cosd(Vars.Lat))
         return GMT
 
-    def insolation(self, Lat_in, Days_in, orb={'ecc': 0.017236, 'long_peri': 281.37, 'obliquity': 23.446}, S0=1366.14):
+    def insolation(self, Lat_in, Days_in, orb={'ecc': 0.017236, 'long_peri': 281.37, 'obliquity': 23.446}, S=1366.14):
         degrad = np.pi / 180
         if type(Days_in) == np.ndarray and type(Lat_in) == np.ndarray:
             Lat = np.tile(Lat_in, (len(Days_in), 1))
@@ -2163,11 +2170,11 @@ class earthsystem:
                       np.where(phi * delta > 0., np.pi, 0.))
         coszen = Ho * np.sin(phi) * np.sin(delta) + np.cos(phi) * np.cos(delta) * np.sin(Ho)
 
-        Fw = S0 / np.pi * ((1 + ecc * np.cos(lambda_long - degrad * long_peri)) ** 2 / (1 - ecc ** 2) ** 2 * coszen)
+        Fw = S / np.pi * ((1 + ecc * np.cos(lambda_long - degrad * long_peri)) ** 2 / (1 - ecc ** 2) ** 2 * coszen)
 
         return Fw
 
-    def solarradiation(self, convfactor, timeunit, orbitalyear, Q):
+    def solarradiation(self, convfactor, timeunit, orbitalyear, S):
         import sys
         """ 
         The solar insolation over the latitudes :math:`Q`.
@@ -2213,28 +2220,28 @@ class earthsystem:
         # time specified
         if timeunit == 'annualmean':
             days = np.arange(365)
-            Q = lna(np.mean(earthsystem().insolation(Vars.Lat, days, Vars.orbitals, S0=Q + Vars.TSI), axis=0))
+            Q = lna(np.mean(earthsystem().insolation(Vars.Lat, days, Vars.orbitals, S=S), axis=0))
         elif timeunit == 'year':
             days = np.linspace(0, ((365 * int(Vars.t) - 1) % 365) * Base.stepsize_of_integration % 365, 36)
             Q = lna(
-                np.mean(earthsystem().insolation(Vars.Lat, days, Vars.orbitals, S0=Q + Vars.TSI), axis=0)) * convfactor
+                np.mean(earthsystem().insolation(Vars.Lat, days, Vars.orbitals, S=S), axis=0)) * convfactor
         elif timeunit == 'month':
             days = np.linspace((int(Vars.t) * 365 / 12) % 365, (int(Vars.t) * 365 / 12 - 1) % 365, 30)
             Q = lna(
-                np.mean(earthsystem().insolation(Vars.Lat, days, Vars.orbitals, S0=Q + Vars.TSI), axis=0)) * convfactor
+                np.mean(earthsystem().insolation(Vars.Lat, days, Vars.orbitals, S=S), axis=0)) * convfactor
         elif timeunit == 'day':
             days = int(Vars.t) % 365
-            Q = lna(earthsystem().insolation(Vars.Lat, days, Vars.orbitals, S0=Q + Vars.TSI)) * convfactor
+            Q = lna(earthsystem().insolation(Vars.Lat, days, Vars.orbitals, S=S)) * convfactor
         elif timeunit == 'second':
             tconv = 60 * 60 * 24
             days = int(Vars.t / tconv) % 365
-            Q = lna(earthsystem().insolation(Vars.Lat, days, Vars.orbitals, S0=Q + Vars.TSI)) * convfactor
+            Q = lna(earthsystem().insolation(Vars.Lat, days, Vars.orbitals, S=S)) * convfactor
         else:
             sys.exit('insolation timeunit unknown')
 
         return Q
 
-    def solarradiation_orbital(self, convfactor, orbitalyear, unit):
+    def solarradiation_orbital(self, convfactor, orbitalyear, unit, S):
         """ 
         The solar insolation over the latitudes :math:`Q` with changing orbital parameters.
       
@@ -2275,13 +2282,13 @@ class earthsystem:
         if Base.Runtime_Tracker == 0:
             # Vars.orbtable=OrbitalTable()
             Vars.orbitals = Vars.orbtable.lookup_parameters(year / 1000)
-            Q = lna(np.mean(insolation(Vars.Lat, days, Vars.orbitals, S0=Q + Vars.TSI), axis=1))
+            Q = lna(np.mean(earthsystem.insolation(Vars.Lat, days, Vars.orbitals, S=S), axis=1))
         # updating for each kiloyear
         if unit == 'year':
             if year % 1000 == 0:
                 print('timeprogress: ' + str(year / 1000) + 'ka')
                 Vars.orbitals = Vars.orbtable.lookup_parameters(year / 1000)
-                Q = lna(np.mean(insolation(Vars.Lat, days, Vars.orbitals, S0=Q + Vars.TSI), axis=1))
+                Q = lna(np.mean(earthsystem.insolation(Vars.Lat, days, Vars.orbitals, S=S), axis=1))
             else:
                 Q = Vars.solar
         else:
