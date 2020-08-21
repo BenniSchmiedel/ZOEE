@@ -30,7 +30,8 @@ import numpy as np
 
 class optimization:
 
-    def __init__(self, mode='Coupled', target=0, response=True, num_steps=10, num_data=None, gamma0=1e-8,
+    def __init__(self, mode='Coupled', target=0, ZMT_response=True, GMT_response=True, num_steps=10, num_data=None,
+                 gamma0=1e-8,
                  cost_function_type='LeastSquare', cost_ratio=0.5, ZMT=0, GMT=0,
                  precision=0, grid=None):
 
@@ -45,7 +46,9 @@ class optimization:
         self.precision = precision  # Precision to which is optimized, then stopped.
         self.cost_function_type = cost_function_type  # Cost function type (least squares)
         self.grid = grid  # Grid (1D latitude resolution)
-        self.response = response  # GMT response/anomaly or not
+        self.ZMT_response = ZMT_response  # GMT response/anomaly or not
+        self.GMT_response = GMT_response  # GMT response/anomaly or not
+
         self.current_step = 0
 
     def _test_for_parameters(self):
@@ -78,6 +81,7 @@ class optimization:
         # self_Pnorm_initial = (P_initial - P_min) / (P_max - P_min)
         self.P_ratio = P_ratio  # Perturbation ratio (ratio to the range between the boundaries)
         self.P_pert = (P_max - P_min) * P_ratio  # Parameter perturbation, p +/- dp
+        self.P_pert_trans = self.P_pert
         # self.Pnorm_pert=np.tile(P_ratio,)
 
     def optimize(self, model, model_config):
@@ -202,7 +206,7 @@ class optimization:
     def _get_gradient(self, F):
         dF = np.zeros(self.num_paras)
         for k in range(self.num_paras):
-            dF[k] = (F[2 * k + 2] - F[2 * k + 1]) / (2 * self.P_pert[k])
+            dF[k] = (F[2 * k + 2] - F[2 * k + 1]) / (2 * self.P_ratio)
         return dF
 
     def _get_stepsize(self, dF0, dF1, P0, P1):
@@ -282,15 +286,23 @@ class optimization:
 
         # Output data
         if self.mode == 'ZMT':
-            data_out = data_CTRL[0][-1]
+            if self.ZMT_response:
+                data_out = np.transpose(np.transpose(data_CTRL[0][-1]) - np.average(data_CTRL[0][-1], weights=np.cos(
+                    self.grid * np.pi / 180)))
+            else:
+                data_out = data_CTRL[0][-1]
         elif self.mode == 'GMT':
-            if self.response:
+            if self.GMT_response:
                 data_out = np.transpose(data_FULL[1] - data_FULL[1][0])
             else:
                 data_out = np.transpose(data_FULL[1])
         elif self.mode == 'Coupled':
-            dataZMT = data_CTRL[0][-1]
-            if self.response:
+            if self.ZMT_response:
+                dataZMT = np.transpose(np.transpose(data_CTRL[0][-1]) - np.average(data_CTRL[0][-1], weights=np.cos(
+                    self.grid * np.pi / 180)))
+            else:
+                dataZMT = data_CTRL[0][-1]
+            if self.GMT_response:
                 dataGMT = np.transpose(data_FULL[1] - data_FULL[1][0])
             else:
                 dataGMT = np.transpose(data_FULL[1])
@@ -365,5 +377,5 @@ class ZOEE_optimization:
             data_out = [data[1] + self.elevation_values,
                         data[2][1:] + np.average(self.elevation_values, weights=cosd(Vars.Lat))]
         else:
-            dataout = [data[1], data[2][1:]]
+            data_out = [data[1], data[2][1:]]
         return data_out
