@@ -124,7 +124,7 @@ class optimization:
 
             # ********************* Interface function for the model used to simulate******************
             # run the model to create the model data which is compared with the target. Two outputs if mode is coupled.
-            data = self.run_model(model, model_config, P)
+            data = self.run_model(model, model_config, P[i])
             # ********************************************************************************
 
             # Assign data and compare the model data with the targetdata. In coupled mode, include ratio of GMT to ZMT costfunction
@@ -259,7 +259,9 @@ class optimization:
                 raise Exception('GMT_initial shape not understood')
 
         data_CTRL = model.run(model_config, P_config, self.mode, self.ZMT_initial, self.GMT_initial, control=True)
-        self.ZMT_initial, self.GMT_initial = data_CTRL[0][-1], data_CTRL[1][-1]
+        # self.ZMT_initial, self.GMT_initial, ZMT_out = data_CTRL[0][-1], data_CTRL[1][-1], data_CTRL[2]
+        ZMT_out = data_CTRL[2]
+        ZMT_CTRL = data_CTRL[0][-1]
 
         # Check dimension
         if np.shape(data_CTRL[1][-1]) != (self.parallels,):
@@ -275,7 +277,7 @@ class optimization:
             # if not control and self.current_step == 0:
             #    ZMT = np.tile(self.ZMT_initial, (self.parallels, 1))
             #    GMT = np.tile(self.GMT_initial, self.parallels)
-            data_FULL = model.run(model_config, P_config, self.mode, self.ZMT_initial, self.GMT_initial, control=False)
+            data_FULL = model.run(model_config, P_config, self.mode, ZMT_CTRL, self.GMT_initial, control=False)
 
             if np.shape(data_FULL[1]) != (self.num_data, self.parallels):
                 raise Exception("GMT output from " + str(model) + " in FULL should have shape (len(parallels) ,\
@@ -287,10 +289,12 @@ class optimization:
         # Output data
         if self.mode == 'ZMT':
             if self.ZMT_response:
-                data_out = np.transpose(np.transpose(data_CTRL[0][-1]) - np.average(data_CTRL[0][-1], weights=np.cos(
-                    self.grid * np.pi / 180)))
+                # data_out = np.transpose(np.transpose(data_CTRL[0][-1]) - np.average(data_CTRL[0][-1], weights=np.cos(
+                #    self.grid * np.pi / 180), axis=1))
+                data_out = np.transpose(np.transpose(ZMT_out) - np.average(ZMT_out, weights=np.cos(
+                    self.grid * np.pi / 180), axis=1))
             else:
-                data_out = data_CTRL[0][-1]
+                data_out = ZMT_out
         elif self.mode == 'GMT':
             if self.GMT_response:
                 data_out = np.transpose(data_FULL[1] - data_FULL[1][0])
@@ -298,10 +302,12 @@ class optimization:
                 data_out = np.transpose(data_FULL[1])
         elif self.mode == 'Coupled':
             if self.ZMT_response:
-                dataZMT = np.transpose(np.transpose(data_CTRL[0][-1]) - np.average(data_CTRL[0][-1], weights=np.cos(
-                    self.grid * np.pi / 180)))
+                # dataZMT = np.transpose(np.transpose(data_CTRL[0][-1]) - np.average(data_CTRL[0][-1], weights=np.cos(
+                #    self.grid * np.pi / 180), axis=1))
+                dataZMT = np.transpose(np.transpose(ZMT_out) - np.average(ZMT_out, weights=np.cos(
+                    self.grid * np.pi / 180), axis=1))
             else:
-                dataZMT = data_CTRL[0][-1]
+                dataZMT = ZMT_out
             if self.GMT_response:
                 dataGMT = np.transpose(data_FULL[1] - data_FULL[1][0])
             else:
@@ -317,53 +323,63 @@ class optimization:
 
         for i in range(self.num_paras):
             for k in range(self.parallels):
-                P_config[i, k] = P[self.current_step][i]
-            P_config[i][i * 2 + 1] = P[self.current_step][i] - self.P_pert[i]
-            P_config[i][i * 2 + 2] = P[self.current_step][i] + self.P_pert[i]
+                P_config[i, k] = P[i]
+            P_config[i][i * 2 + 1] = P[i] - self.P_pert[i]
+            P_config[i][i * 2 + 2] = P[i] + self.P_pert[i]
         return P_config
 
 #---------Provide here the model specific run-script to be included in the interfrace of optimization.optimize-------
 class ZOEE_optimization:
     """ZOEE specific implementations to run the optimization"""
 
-    def __init__(self, num_params, mode, labels, levels, elevation, elevation_values, monthly=True):
+    def __init__(self, num_params, labels, levels, elevation, elevation_values, monthly=True):
         self.parallel = True
         self.labels = labels
         self.levels = levels
         self.monthly = monthly
         self.num_params = num_params
-        self.mode = mode
         self.elevation = elevation
         self.elevation_values = elevation_values
 
     def _overwrite_parameters(self, config, P_config):
 
-        for i in range(self.num_params):
-            if self.levels[i] is None:
-                if self.labels[i][0][:4] == 'func':
-                    config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]] = P_config[i]
-                if self.labels[i][0] == 'eqparam':
-                    config[self.labels[i][0]][self.labels[i][1]] = P_config[i]
+        if self.num_params == 1:
+            if self.levels is None:
+                if self.labels[0][:4] == 'func':
+                    config['funccomp']['funcparam'][self.labels[0]][self.labels[1]] = P_config
+                if self.labels[0] == 'eqparam':
+                    config[self.labels[0]][self.labels[1]] = P_config
             else:
-                if type(config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]]) == float:
-                    raise Exception('parameter no. ' + str(i) + 'not defined in 1d space')
-                elif np.shape(config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]]) == (
-                        self.levels[i],):
-                    config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]] = \
-                        np.transpose(np.tile(config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]],
-                                             (P_config[i].size, 1)))
-                if self.labels[i][0][:4] == 'func':
-                    config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]][self.levels[i]] = P_config[i]
-                if self.labels[i][0] == 'eqparam':
-                    config[self.labels[i][0]][self.labels[i][1]][i] = P_config[i]
+                if self.labels[0][:4] == 'func':
+                    config['funccomp']['funcparam'][self.labels[0]][self.labels[1]][self.levels] = P_config
+        else:
+            for i in range(self.num_params):
+
+                if self.levels[i] is None:
+                    if self.labels[i][0][:4] == 'func':
+                        config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]] = P_config[i]
+                    if self.labels[i][0] == 'eqparam':
+                        config[self.labels[i][0]][self.labels[i][1]] = P_config[i]
+                else:
+                    if type(config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]]) == float:
+                        raise Exception('parameter no. ' + str(i) + 'not defined in 1d space')
+                    elif np.shape(config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]]) == (
+                            self.levels[i],):
+                        config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]] = \
+                            np.transpose(np.tile(config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]],
+                                                 (P_config[i].size, 1)))
+                    if self.labels[i][0][:4] == 'func':
+                        config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]][self.levels[i]] = \
+                        P_config[i]
+                    if self.labels[i][0] == 'eqparam':
+                        config[self.labels[i][0]][self.labels[i][1]][i] = P_config[i]
         return config
 
-    def run(self, config, P_config, mode, ZMT, GMT, control=False):
+    def run(self, config, P_config, ZMT, GMT, control=False):
         from .variables import variable_importer, Vars
         from .rk4 import rk4alg
         from .functions import cosd
 
-        self.mode = mode
         parallel_config = {'number_of_parameters': self.num_params, 'number_of_cycles': 1,
                            'number_of_parallels': int(self.num_params * 2 + 1)}
 
@@ -373,9 +389,15 @@ class ZOEE_optimization:
 
         Vars.T, Vars.T_global = ZMT, GMT
         data = rk4alg(config, progressbar=True, monthly=self.monthly)
-        if self.elevation:
-            data_out = [data[1] + self.elevation_values,
-                        data[2][1:] + np.average(self.elevation_values, weights=cosd(Vars.Lat))]
+        if control:
+            if self.elevation:
+                data_out = [data[1], data[2][1:], data[1][-1] + self.elevation_values]
+            else:
+                data_out = [data[1], data[2][1:], data[1][-1]]
         else:
-            data_out = [data[1], data[2][1:]]
+            if self.elevation:
+                data_out = [data[1] + self.elevation_values,
+                            data[2][1:] + np.average(self.elevation_values, weights=cosd(Vars.Lat))]
+            else:
+                data_out = [data[1], data[2][1:]]
         return data_out

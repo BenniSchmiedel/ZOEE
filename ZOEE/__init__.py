@@ -113,7 +113,7 @@ class LatitudeScale(mscale.ScaleBase):
 
         thresh: The degree above which to crop the data.
         """
-        super().__init__()
+        super().__init__(axis)
         if thresh >= np.pi / 2:
             raise ValueError("thresh must be less than pi/2")
         self.thresh = thresh

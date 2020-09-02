@@ -63,7 +63,7 @@ from qualname import qualname
 #import xarray as xr
 
 
-class Vars():
+class Vars:
     """
     ``variables.Vars`` defines any variable desired to store and access from another module's functions.
 
@@ -146,6 +146,7 @@ class Vars():
     +---------------+-----------------------------------------------------------------------+             
  
     """
+
     ###Running variables -- RK4###
     t=float
     T=float
@@ -220,9 +221,9 @@ class Vars():
         self.AODTracker=[0,0]
         self.OrbitalTracker=[0,{'ecc': 0, 'long_peri': 0, 'obliquity': 0}]
         self.meridional=list
-        self.tempdif=list
-        self.TSI=float
-        self.AOD=float
+        self.tempdif = list
+        self.TSI = None
+        self.AOD = float
         
         self.solar=list
         self.area=list
@@ -340,6 +341,7 @@ def trackerreset():
     reset('SolarTracker')
     reset('OrbitalTracker')
     reset('AODTracker')
+    reset('TSI')
     
 def reset(x):
     """ 
@@ -381,6 +383,7 @@ def datareset():
     Vars.Lat2=classreset.Lat2
 
 def variable_importer(config,initialZMT=True,control=False,parallel=False,parallel_config=0,accuracy=1e-3,accuracy_number=1000):
+    from .variables import Vars
     """ 
     Executes all relevant functions to import variables for a single simulation run. From the *configuration* dictionary, returned by ``configuration.importer``, the relevant information is extracted and the specific importer functions are executed in the following order:
 
