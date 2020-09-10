@@ -25,7 +25,7 @@ Parameters = []
 for i in range(6):
     Parameters.append({'name': parameter_labels[i],
                        'level': parameter_levels[i],
-                       'range': np.linspace(Pmin[i], Pmax[i], 2)})
+                       'range': np.linspace(Pmin[i], Pmax[i], 50)})
 
 # # Parameter experiments - HadCM3 config
 
@@ -33,7 +33,7 @@ for i in range(6):
 
 
 config_HadCM3 = importer('Experiments/HadCM3/Config_HadCM3.ini')
-parallel_config = {'number_of_parameters': 1, 'number_of_cycles': 1, 'number_of_parallels': 2}
+parallel_config = {'number_of_parameters': 1, 'number_of_cycles': 1, 'number_of_parallels': 50}
 variable_importer(config_HadCM3, initialZMT=True, parallel=True, parallel_config=parallel_config)
 config_HadCM3, Sellers = add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,
                                                'ZOEE/config/SellersParameterization.ini', 4, 2, True, True)
@@ -66,7 +66,7 @@ print('HadCM3 - Finished. Next: CESM')
 
 
 config_CESM = importer('Experiments/CESM/Config_CESM.ini')
-parallel_config = {'number_of_parameters': 1, 'number_of_cycles': 1, 'number_of_parallels': 2}
+parallel_config = {'number_of_parameters': 1, 'number_of_cycles': 1, 'number_of_parallels': 50}
 variable_importer(config_CESM, initialZMT=True, parallel=True, parallel_config=parallel_config)
 config_CESM, Sellers = add_sellersparameters(config_CESM, parameterinterpolatorstepwise,
                                              'ZOEE/config/SellersParameterization.ini', 4, 2, True, True)
@@ -99,7 +99,7 @@ print('CESM - Finished. Next: Pages')
 
 
 config_Pages = importer('Experiments/Pages2k/Config_Pages.ini')
-parallel_config = {'number_of_parameters': 1, 'number_of_cycles': 1, 'number_of_parallels': 2}
+parallel_config = {'number_of_parameters': 1, 'number_of_cycles': 1, 'number_of_parallels': 50}
 variable_importer(config_Pages, initialZMT=True, parallel=True, parallel_config=parallel_config)
 config_Pages, Sellers = add_sellersparameters(config_Pages, parameterinterpolatorstepwise,
                                               'ZOEE/config/SellersParameterization.ini', 4, 2, True, True)
