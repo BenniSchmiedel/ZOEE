@@ -26,7 +26,7 @@ When the algorithm is run is operates the following scheme: 1) Run the model to 
 """
 
 import numpy as np
-
+import copy
 
 class optimization:
 
@@ -342,38 +342,38 @@ class ZOEE_optimization:
         self.elevation_values = elevation_values
 
     def _overwrite_parameters(self, config, P_config):
-
+        config_out = copy.deepcopy(config)
         if self.num_params == 1:
             if self.levels is None:
                 if self.labels[0][:4] == 'func':
-                    config['funccomp']['funcparam'][self.labels[0]][self.labels[1]] = P_config
+                    config_out['funccomp']['funcparam'][self.labels[0]][self.labels[1]] = P_config
                 if self.labels[0] == 'eqparam':
-                    config[self.labels[0]][self.labels[1]] = P_config
+                    config_out[self.labels[0]][self.labels[1]] = P_config
             else:
                 if self.labels[0][:4] == 'func':
-                    config['funccomp']['funcparam'][self.labels[0]][self.labels[1]][self.levels] = P_config
+                    config_out['funccomp']['funcparam'][self.labels[0]][self.labels[1]][self.levels] = P_config
         else:
             for i in range(self.num_params):
 
                 if self.levels[i] is None:
                     if self.labels[i][0][:4] == 'func':
-                        config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]] = P_config[i]
+                        config_out['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]] = P_config[i]
                     if self.labels[i][0] == 'eqparam':
-                        config[self.labels[i][0]][self.labels[i][1]] = P_config[i]
+                        config_out[self.labels[i][0]][self.labels[i][1]] = P_config[i]
                 else:
                     if type(config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]]) == float:
                         raise Exception('parameter no. ' + str(i) + 'not defined in 1d space')
                     elif np.shape(config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]]) == (
                             self.levels[i],):
-                        config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]] = \
+                        config_out['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]] = \
                             np.transpose(np.tile(config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]],
                                                  (P_config[i].size, 1)))
                     if self.labels[i][0][:4] == 'func':
-                        config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]][self.levels[i]] = \
-                        P_config[i]
+                        config_out['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]][self.levels[i]] = \
+                            P_config[i]
                     if self.labels[i][0] == 'eqparam':
-                        config[self.labels[i][0]][self.labels[i][1]][i] = P_config[i]
-        return config
+                        config_out[self.labels[i][0]][self.labels[i][1]][i] = P_config[i]
+        return config_out
 
     def run(self, config, P_config, ZMT, GMT, control=False):
         from .variables import variable_importer, Vars
