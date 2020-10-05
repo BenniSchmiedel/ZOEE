@@ -1616,10 +1616,10 @@ class forcing:
             Vars.ExternalInput[forcingnumber] = [0, 0]
             Vars.ExternalInput[forcingnumber][0] = np.genfromtxt(str(datapath) + str(name), delimiter=str(delimiter),
                                                                  skip_header=header, skip_footer=footer,
-                                                                 usecols=(col_time), unpack=True, encoding='ISO-8859-1')
+                                                                 usecols=(col_time), unpack=True)
             Vars.ExternalInput[forcingnumber][1] = np.transpose(
                 np.genfromtxt(str(datapath) + str(name), delimiter=str(delimiter), skip_header=header,
-                              usecols=forcingscols, unpack=True, encoding='ISO-8859-1'))
+                              usecols=forcingscols, unpack=True))
 
             Vars.External_time_start[forcingnumber] = time_start
             Vars.ExternalInput[forcingnumber][1] = lna(Vars.ExternalInput[forcingnumber][1]) * k_input + m_input

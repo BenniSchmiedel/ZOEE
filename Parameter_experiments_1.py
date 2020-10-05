@@ -47,7 +47,7 @@ for i in range(6):
     ZOEE = ZOEE_optimization(1, Parameters[i]['name'], Parameters[i]['level'], True, elevation)
     config_overwrite = ZOEE._overwrite_parameters(config_HadCM3, Parameters[i]['range'])
 
-    if len(list(config_HadCM3['eqparam'].keys())) > 1:
+    if config_HadCM3['eqparam']['c_ao'] is float:
         raise Exception('Config overwrite acts recursively. Outdated version of ZOEE.modules.optimization is called.')
     # config_addparameters=add_parameters(config_addsellers,parameter_values,parameter_labels)
 
@@ -82,7 +82,7 @@ for i in range(6):
     print('---------- CESM Parameter ' + str(i) + ' -----------')
     ZOEE = ZOEE_optimization(1, Parameters[i]['name'], Parameters[i]['level'], True, elevation)
     config_overwrite = ZOEE._overwrite_parameters(config_CESM, Parameters[i]['range'])
-    if len(list(config_HadCM3['eqparam'].keys())) > 1:
+    if config_HadCM3['eqparam']['c_ao'] is float:
         raise Exception('Config overwrite acts recursively. Outdated version of ZOEE.modules.optimization is called.')
     # config_addparameters=add_parameters(config_addsellers,parameter_values,parameter_labels)
 
@@ -117,7 +117,7 @@ for i in range(6):
     print('---------- Pages Parameter ' + str(i) + ' -----------')
     ZOEE = ZOEE_optimization(1, Parameters[i]['name'], Parameters[i]['level'], True, elevation)
     config_overwrite = ZOEE._overwrite_parameters(config_Pages, Parameters[i]['range'])
-    if len(list(config_HadCM3['eqparam'].keys())) > 1:
+    if config_HadCM3['eqparam']['c_ao'] is float:
         raise Exception('Config overwrite acts recursively. Outdated version of ZOEE.modules.optimization is called.')
     # config_addparameters=add_parameters(config_addsellers,parameter_values,parameter_labels)
 
