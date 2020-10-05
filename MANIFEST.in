@@ -1,4 +1,5 @@
 include ZOEE/tutorials/*
 include ZOEE/forcings/*
 include Experiments/*
+include ZOEE/config/*
 

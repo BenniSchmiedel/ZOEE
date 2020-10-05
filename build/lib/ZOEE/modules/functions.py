@@ -629,7 +629,7 @@ class flux_up:
         if Base.parallelization == True:
             paras = [A, B]
             A, B = [np.transpose(np.array([paras[i]] * len(Vars.Lat))) if np.shape(paras[i]) == (
-                Base.number_of_parallels,) else paras[i] for i in range(len(paras))]
+            Base.number_of_parallels,) else paras[i] for i in range(len(paras))]
             if type(Activation) == bool:
                 R_out = -(A + B * (Vars.T - 273.15))
             else:
@@ -692,7 +692,7 @@ class flux_up:
         if Base.parallelization == True:
             paras = [grey, sig]
             grey, sig = [np.transpose(np.array([paras[i]] * len(Vars.Lat))) if np.shape(paras[i]) == (
-                Base.number_of_parallels,) else paras[i] for i in range(len(paras))]
+            Base.number_of_parallels,) else paras[i] for i in range(len(paras))]
             if type(Activation) == bool:
                 R_out = -(grey * sig * Vars.T ** 4)
             else:
@@ -769,7 +769,7 @@ class flux_up:
         if Base.parallelization == True:
             paras = [m, sigma, gamma, k]
             m, sigma, gamma, k = [np.transpose(np.array([paras[i]] * len(Vars.Lat))) if np.shape(paras[i]) == (
-                Base.number_of_parallels,) else paras[i] for i in range(len(paras))]
+            Base.number_of_parallels,) else paras[i] for i in range(len(paras))]
             if type(Activation) == bool:
                 R_out = -k * sigma * Vars.T ** 4 * (1 - m * np.tanh(gamma * Vars.T ** 6))
             else:
@@ -861,8 +861,8 @@ class transfer:
         beta, Activated = list_parameters
         if Base.parallelization == True:
             beta = np.transpose(np.array([beta] * len(Vars.Lat))) if np.shape(beta) == (
-                Base.number_of_parallels,) else np.transpose(beta) if np.shape(beta) == (
-                len(Vars.Lat), Base.number_of_parallels) else beta
+            Base.number_of_parallels,) else np.transpose(beta) if np.shape(beta) == (
+            len(Vars.Lat), Base.number_of_parallels) else beta
 
         if Activated == True:  # with activation statement
             if Base.parallelization == True:
@@ -1076,7 +1076,7 @@ class transfer:
                      factor_air, factor_oc, factor_kwv, factor_kair]
             K_wv, K_h, K_o, g, a, eps, p, e0, L, Rd, dy, dp, cp, dz, l_cover, re, cp_w, dens_w, factor_wv, factor_air, factor_oc, factor_kwv, factor_kair = \
                 [np.transpose(np.array([paras[i]] * len(Vars.Lat2))) if np.shape(paras[i]) == (
-                    Base.number_of_parallels,) else paras[i] for i in range(len(paras))]
+                Base.number_of_parallels,) else paras[i] for i in range(len(paras))]
 
         if Activated == True:
             # Parameters for different transfer Fluxes+their calculation
@@ -1314,7 +1314,7 @@ class transfer:
             C = (a1 - a2) * a3 * factor_air
         else:
             C = (Vars.meridional * Vars.T[1:] - K_h * factor_kair * (Vars.tempdif / (dy))) * (
-                    cp * dp * const.mb_to_Pa / g) * factor_air
+                        cp * dp * const.mb_to_Pa / g) * factor_air
         return C
 
     def sensibleheat_ocean_sel(self, funcparam):
@@ -1489,13 +1489,13 @@ class forcing:
         if Base.Runtime_Tracker == 0:
             Vars.ExternalInput[forcingnumber] = np.genfromtxt(str(datapath) + str(name), delimiter=str(delimiter),
                                                               skip_header=header, skip_footer=footer,
-                                                              usecols=(col_time, col_forcing), unpack=True
-                                                              )
+                                                              usecols=(col_time, col_forcing), unpack=True,
+                                                              encoding='ISO-8859-1')
             Vars.External_time_start[forcingnumber] = time_start
             Vars.ExternalInput[forcingnumber][1] = lna(Vars.ExternalInput[forcingnumber][1]) * k_input + m_input
             if BP == True:
                 Vars.ExternalInput[forcingnumber][0] = -(
-                        lna(Vars.ExternalInput[forcingnumber][0]) - Vars.External_time_start[forcingnumber])
+                            lna(Vars.ExternalInput[forcingnumber][0]) - Vars.External_time_start[forcingnumber])
             if BP == False:
                 Vars.ExternalInput[forcingnumber][0] = lna(Vars.ExternalInput[forcingnumber][0]) + \
                                                        Vars.External_time_start[forcingnumber]
@@ -1625,7 +1625,7 @@ class forcing:
             Vars.ExternalInput[forcingnumber][1] = lna(Vars.ExternalInput[forcingnumber][1]) * k_input + m_input
             if BP == True:
                 Vars.ExternalInput[forcingnumber][0] = -(
-                        lna(Vars.ExternalInput[forcingnumber][0]) - Vars.External_time_start[forcingnumber])
+                            lna(Vars.ExternalInput[forcingnumber][0]) - Vars.External_time_start[forcingnumber])
             if BP == False:
                 Vars.ExternalInput[forcingnumber][0] = lna(Vars.ExternalInput[forcingnumber][0]) + \
                                                        Vars.External_time_start[forcingnumber]
@@ -1762,8 +1762,8 @@ class forcing:
         A, C_0, CO2_base, datapath, name, delimiter, header, footer, col_time, col_conc, timeunit, BP, time_start = list_parameters
         if Base.Runtime_Tracker == 0:
             Vars.CO2Input = np.genfromtxt(str(datapath) + str(name), delimiter=str(delimiter), skip_header=header,
-                                          skip_footer=footer, usecols=(col_time, col_conc), unpack=True
-                                          )
+                                          skip_footer=footer, usecols=(col_time, col_conc), unpack=True,
+                                          encoding='ISO-8859-1')
             Vars.CO2_time_start = time_start
             if BP == True:
                 Vars.CO2Input[0] = -(lna(Vars.CO2Input[0]) - Vars.CO2_time_start)
@@ -1905,7 +1905,8 @@ class forcing:
         if Base.Runtime_Tracker == 0:
             Vars.ExternalOrbitals = np.genfromtxt(str(datapath) + str(name), delimiter=str(delimiter),
                                                   skip_header=header, skip_footer=footer,
-                                                  usecols=(col_time, col_ecc, col_per, col_obl), unpack=True)
+                                                  usecols=(col_time, col_ecc, col_per, col_obl), unpack=True,
+                                                  encoding='ISO-8859-1')
             Vars.External_time_start = time_start
 
             if BP == True:
@@ -2050,8 +2051,8 @@ class forcing:
         datapath, name, delimiter, header, footer, col_time, col_forcing, timeunit, BP, time_start, k_output, m_output, k_input, m_input = list_parameters
         if Base.Runtime_Tracker == 0:
             Vars.SolarInput = np.genfromtxt(str(datapath) + str(name), delimiter=str(delimiter), skip_header=header,
-                                            skip_footer=footer, usecols=(col_time, col_forcing), unpack=True
-                                            )
+                                            skip_footer=footer, usecols=(col_time, col_forcing), unpack=True,
+                                            encoding='ISO-8859-1')
             Vars.Solar_time_start = time_start
             Vars.SolarInput[1] = lna(Vars.SolarInput[1]) * k_input + m_input
             if BP == True:
@@ -2084,6 +2085,7 @@ class forcing:
 
         Vars.TSI = Vars.SolarTracker[1] * k_output + m_output
         if Base.Runtime_Tracker % (4 * Base.data_readout) == 0:
+
             Vars.SolarOutput[int(Base.Runtime_Tracker / (4 * Base.data_readout))] = Vars.TSI
         return 0
 

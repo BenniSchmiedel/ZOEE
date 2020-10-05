@@ -9,7 +9,7 @@ def Tutorial_copy(*args,**kwargs):
             
     data_paths=[]
     for i in sys.path:
-        data_paths.append(i + '/ZOEE/tutorials')
+        data_paths.append(i+'/ZOEE/tutorials')
     for data in data_paths:
         exists = os.path.isdir(data)
         if exists:
@@ -19,13 +19,13 @@ def Tutorial_copy(*args,**kwargs):
     for trypath in possible_paths:
         exists= os.path.isdir(trypath)
         if exists:
-
-            if os.path.exists(trypath + '/tutorials/notebooks') and os.path.exists(trypath + '/tutorials/config'):
-                shutil.rmtree(trypath + '/tutorials/notebooks')
-                shutil.rmtree(trypath + '/tutorials/config')
-            shutil.copytree(data + '/notebooks', trypath + '/tutorials/notebooks')
-            shutil.copytree(data + '/config', trypath + '/tutorials/config')
-            exit = True
+            
+            if os.path.exists(trypath+'/tutorials/notebooks') and os.path.exists(trypath+'/tutorials/config'):
+                shutil.rmtree(trypath+'/tutorials/notebooks')
+                shutil.rmtree(trypath+'/tutorials/config')
+            shutil.copytree(data+'/notebooks',trypath+'/tutorials/notebooks')
+            shutil.copytree(data+'/config',trypath+'/tutorials/config')
+            exit=True
             break
     if exit:
         print('Copy tutorial files to:'+trypath)
@@ -43,7 +43,7 @@ def Forcing_copy(*args,**kwargs):
             
     data_paths=[]
     for i in sys.path:
-        data_paths.append(i + '/ZOEE/forcings')
+        data_paths.append(i+'/ZOEE/forcings')
     for data in data_paths:
         exists = os.path.isdir(data)
         if exists:
@@ -53,16 +53,15 @@ def Forcing_copy(*args,**kwargs):
     for trypath in possible_paths:
         exists= os.path.isdir(trypath)
         if exists:
-
-            if os.path.exists(trypath + '/forcings/TSI') and os.path.exists(
-                    trypath + '/forcings/Orbital') and os.path.exists(trypath + '/forcings/Volcanic'):
-                shutil.rmtree(trypath + '/forcings/TSI')
-                shutil.rmtree(trypath + '/forcings/Orbital')
-                shutil.rmtree(trypath + '/forcings/Volcanic')
-            shutil.copytree(data + '/TSI', trypath + '/forcings/TSI')
-            shutil.copytree(data + '/Orbital', trypath + '/forcings/Orbital')
-            shutil.copytree(data + '/Volcanic', trypath + '/forcings/Volcanic')
-            exit = True
+            
+            if os.path.exists(trypath+'/forcings/TSI') and os.path.exists(trypath+'/forcings/Orbital') and os.path.exists(trypath+'/forcings/Volcanic'):
+                shutil.rmtree(trypath+'/forcings/TSI')
+                shutil.rmtree(trypath+'/forcings/Orbital')
+                shutil.rmtree(trypath+'/forcings/Volcanic')
+            shutil.copytree(data+'/TSI',trypath+'/forcings/TSI')
+            shutil.copytree(data+'/Orbital',trypath+'/forcings/Orbital')
+            shutil.copytree(data+'/Volcanic',trypath+'/forcings/Volcanic')
+            exit=True
             break
     if exit:
         print('Copy forcing data to:'+trypath)

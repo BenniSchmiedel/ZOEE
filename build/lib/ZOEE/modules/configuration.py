@@ -58,22 +58,21 @@ def importer(filename,*args,**kwargs):
     
     #Importing the configfile.ini from path
     if path == None:
-        possible_paths = ['', 'config/', '../config/', '../../config/', 'ZOEE/config/']
+        possible_paths=['','config/','../config/','../../config/','ZOEE/config/']
         for i in sys.path:
-            possible_paths.append(i + '/ZOEE/tutorials/config/')
+            possible_paths.append(i+'/ZOEE/tutorials/config/')
             possible_paths.append(i + '/ZOEE/config/')
         print(possible_paths)
         for trypath in possible_paths:
-            exists = os.path.isfile(trypath + filename)
+            exists = os.path.isfile(trypath+filename)
             if exists:
-                path = trypath
-                print('Loading Configuration from: ' + path + filename)
-                config = configparser.ConfigParser()
-                config.read(path + filename)
-                break
-            if trypath == possible_paths[-1]:
-                sys.exit(
-                    'Error: File not found, please specify the path of the configuration.ini.  importer(filename,path= " ... ")')
+                path=trypath
+                print('Loading Configuration from: '+path+filename)
+                config=configparser.ConfigParser()  
+                config.read(path+filename)    
+                break 
+            if trypath==possible_paths[-1]:
+                sys.exit('Error: File not found, please specify the path of the configuration.ini.  importer(filename,path= " ... ")')
     else:
     #Importing the configfile.ini
         
@@ -286,7 +285,7 @@ def parameterimporter(filename,*args,**kwargs):
         circles[i].reverse()
         circlecomb[i]=circles[i]+circlen[i]"""
 
-    return circle, belt  # circlecomb, beltcomb
+    return circle,belt#circlecomb, beltcomb
 
 
 def overwrite_parameters(config, P_config, num_params, labels, levels):
@@ -323,10 +322,9 @@ def overwrite_parameters(config, P_config, num_params, labels, levels):
                     config_out[labels[i][0]][labels[i][1]][i] = P_config[i]
     return config_out
 
-
 ###Function to interpolate the parameterizations given from sellers, into an interpolated
 ####output with higher resolution
-def parameterinterpolator(filename, *args, **kwargs):
+def parameterinterpolator(filename,*args,**kwargs):
     """
     An interpolation method fitting a polynomial of degree 10 to the parameter distributions. This creates parameter distributions suitable for the gridresolution (necessary if a higher resolution than 10° is used.
 
