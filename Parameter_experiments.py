@@ -46,14 +46,16 @@ for i in range(6):
     print('---------- HadCM3 Parameter ' + str(i) + ' -----------')
     ZOEE = ZOEE_optimization(1, Parameters[i]['name'], Parameters[i]['level'], True, elevation)
     config_overwrite = ZOEE._overwrite_parameters(config_HadCM3, Parameters[i]['range'])
+    if config_HadCM3 == config_overwrite:
+        raise Exception('Config overwrite worked recursive. ')
     # config_addparameters=add_parameters(config_addsellers,parameter_values,parameter_labels)
 
     variable_importer(config_overwrite, initialZMT=True, parallel=True, parallel_config=parallel_config, control=True)
-    CTRL = rk4alg(config_overwrite, progressbar=False)
+    CTRL = rk4alg(config_overwrite, progressbar=False, monthly=True)
 
     variable_importer(config_overwrite, initialZMT=False, parallel=True, parallel_config=parallel_config, control=False)
     Vars.T = CTRL[1][-1]
-    FULL = rk4alg(config_overwrite, progressbar=False)
+    FULL = rk4alg(config_overwrite, progressbar=False, monthly=True)
 
     np.savetxt('Experiments/Output/Parametertest_HadCM3_' + str(i) + '.txt',
                [Parameters[i]['range'], *np.transpose(CTRL[1][-1]), *FULL[2]],
@@ -82,11 +84,11 @@ for i in range(6):
     # config_addparameters=add_parameters(config_addsellers,parameter_values,parameter_labels)
 
     variable_importer(config_overwrite, initialZMT=True, parallel=True, parallel_config=parallel_config, control=True)
-    CTRL = rk4alg(config_overwrite, progressbar=False)
+    CTRL = rk4alg(config_overwrite, progressbar=False, monthly=True)
 
     variable_importer(config_overwrite, initialZMT=False, parallel=True, parallel_config=parallel_config, control=False)
     Vars.T = CTRL[1][-1]
-    FULL = rk4alg(config_overwrite, progressbar=False)
+    FULL = rk4alg(config_overwrite, progressbar=False, monthly=True)
 
     np.savetxt('Experiments/Output/Parametertest_CESM_' + str(i) + '.txt',
                [Parameters[i]['range'], *np.transpose(CTRL[1][-1]), *FULL[2]],
