@@ -62,7 +62,7 @@ def importer(filename,*args,**kwargs):
         for i in sys.path:
             possible_paths.append(i + '/ZOEE/tutorials/config/')
             possible_paths.append(i + '/ZOEE/config/')
-        print(possible_paths)
+        # print(possible_paths)
         for trypath in possible_paths:
             exists = os.path.isfile(trypath + filename)
             if exists:
