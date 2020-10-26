@@ -82,9 +82,9 @@ elevation = -0.0065 * np.array(Sellers[1][1])
 
 for i in range(6):
     print('---------- CESM Parameter ' + str(i) + ' -----------')
-    config_overwrite = overwrite_parameters(config_HadCM3, Parameters[i]['range'], num_params, parameter_labels[i],
+    config_overwrite = overwrite_parameters(config_CESM, Parameters[i]['range'], num_params, parameter_labels[i],
                                             parameter_levels[i])
-    if config_HadCM3['eqparam']['c_ao'] is float:
+    if config_CESM['eqparam']['c_ao'] is float:
         raise Exception('Config overwrite acts recursively. Outdated version of ZOEE.modules.optimization is called.')
     # config_addparameters=add_parameters(config_addsellers,parameter_values,parameter_labels)
 
@@ -117,9 +117,9 @@ elevation = -0.0065 * np.array(Sellers[1][1])
 
 for i in range(6):
     print('---------- Pages Parameter ' + str(i) + ' -----------')
-    config_overwrite = overwrite_parameters(config_HadCM3, Parameters[i]['range'], num_params, parameter_labels[i],
+    config_overwrite = overwrite_parameters(config_Pages, Parameters[i]['range'], num_params, parameter_labels[i],
                                             parameter_levels[i])
-    if config_HadCM3['eqparam']['c_ao'] is float:
+    if config_Pages['eqparam']['c_ao'] is float:
         raise Exception('Config overwrite acts recursively. Outdated version of ZOEE.modules.optimization is called.')
     # config_addparameters=add_parameters(config_addsellers,parameter_values,parameter_labels)
 

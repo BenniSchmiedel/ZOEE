@@ -14,7 +14,8 @@ import numpy as np
 from .variables import Vars, Base
 from qualname import qualname
 
-def model_equation(eqparam,funccomp):
+
+def model_equation(eqparam, funccomp):
     """
     The module which builds and evaluates the EBM by adding functions parsed through the **funccomp**.
 
@@ -42,19 +43,20 @@ def model_equation(eqparam,funccomp):
     :rtype:                     float or array(float), depending on 0D EBM or 1D EBM. In 1D, output is an array containing the temperature gradient for each latitudinal belt.
 
     """
-    y=0                    	            #variable which can be used to sum up functions
-    funclist=funccomp['funclist']             #Extracting needed arrays from the funccomp array
-    funcparam=funccomp['funcparam']
-    C_ao=eqparam['c_ao']                    #Extracting Equationparameters
-    if Base.parallelization==True:
-        C_ao=np.transpose(np.array([C_ao]*len(Vars.Lat))) if np.shape(C_ao)==(Base.number_of_parallels,) else C_ao
+    y = 0  # variable which can be used to sum up functions
+    funclist = funccomp['funclist']  # Extracting needed arrays from the funccomp array
+    funcparam = funccomp['funcparam']
+    C_ao = eqparam['c_ao']  # Extracting Equationparameters
+    if Base.parallelization:
+        C_ao = np.transpose(np.array([C_ao] * len(Vars.Lat))) if np.shape(C_ao) == (Base.number_of_parallels,) else C_ao
     for funcnum in funclist:
-        if Base.control==True:
-            if qualname(funclist[funcnum])[:7]=='forcing':
+        if Base.control:
+            if qualname(funclist[funcnum]) == 'forcing.solar' and Base.Runtime_Tracker == 0:
+                y += funclist[funcnum](funcparam[funcnum])
+            elif qualname(funclist[funcnum])[:7] == 'forcing':
                 pass
             else:
-                y += funclist[funcnum](funcparam[funcnum])    #Calling the selected function and sum them up 
+                y += funclist[funcnum](funcparam[funcnum])  # Calling the selected function and sum them up
         else:
-            y += funclist[funcnum](funcparam[funcnum])    #Calling the selected function and sum them up 
-    return y/C_ao           #output of y, weighted with the heat capacity
-
+            y += funclist[funcnum](funcparam[funcnum])  # Calling the selected function and sum them up
+    return y / C_ao  # output of y, weighted with the heat capacity

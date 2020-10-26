@@ -1493,10 +1493,10 @@ class forcing:
                                                               )
             Vars.External_time_start[forcingnumber] = time_start
             Vars.ExternalInput[forcingnumber][1] = lna(Vars.ExternalInput[forcingnumber][1]) * k_input + m_input
-            if BP == True:
+            if BP:
                 Vars.ExternalInput[forcingnumber][0] = -(
                         lna(Vars.ExternalInput[forcingnumber][0]) - Vars.External_time_start[forcingnumber])
-            if BP == False:
+            if not BP:
                 Vars.ExternalInput[forcingnumber][0] = lna(Vars.ExternalInput[forcingnumber][0]) + \
                                                        Vars.External_time_start[forcingnumber]
             if timeunit == 'minute':
@@ -1513,7 +1513,7 @@ class forcing:
             if timeunit == 'year':
                 Vars.ExternalInput[forcingnumber][0] = lna(Vars.ExternalInput[forcingnumber][0]) * 60 * 60 * 24 * 365
 
-        while Vars.t > Vars.ExternalInput[forcingnumber][0][Vars.ForcingTracker[forcingnumber][0]]:
+        while Vars.t >= Vars.ExternalInput[forcingnumber][0][Vars.ForcingTracker[forcingnumber][0]]:
             if Vars.ForcingTracker[forcingnumber][0] == (len(Vars.ExternalInput[forcingnumber][0]) - 1):
                 Vars.ForcingTracker[forcingnumber][1] = 0
                 break
@@ -2071,18 +2071,26 @@ class forcing:
             if timeunit == 'year':
                 Vars.SolarInput[0] = lna(Vars.SolarInput[0]) * 60 * 60 * 24 * 365
 
-        if Base.Runtime_Tracker == 0:
-            Vars.TSI = Vars.SolarInput[1][0]
-            Vars.SolarTracker[1] = Vars.SolarInput[1][0]
-        while Vars.t > Vars.SolarInput[0][Vars.SolarTracker[0]]:
-            if Vars.SolarTracker[0] == (len(Vars.SolarInput[0]) - 1):
-                Vars.SolarTracker[1] = 0
-                break
-            else:
-                Vars.SolarTracker[1] = Vars.SolarInput[1][Vars.SolarTracker[0]]
-                Vars.SolarTracker[0] += 1
+            # Set initial value, checked by time
 
-        Vars.TSI = Vars.SolarTracker[1] * k_output + m_output
+        if Base.Runtime_Tracker == 0:
+            Vars.SolarTracker[1] = None
+            while Vars.t >= Vars.SolarInput[0][Vars.SolarTracker[0]]:
+                if Vars.SolarTracker[0] == (len(Vars.SolarInput[0]) - 1):
+                    break
+                else:
+                    Vars.SolarTracker[1] = Vars.SolarInput[1][Vars.SolarTracker[0]] * k_output + m_output
+                    Vars.SolarTracker[0] += 1
+            Vars.TSI = Vars.SolarTracker[1]
+
+        else:
+            while Vars.t >= Vars.SolarInput[0][Vars.SolarTracker[0]]:
+                if Vars.SolarTracker[0] == (len(Vars.SolarInput[0]) - 1):
+                    break
+                else:
+                    Vars.SolarTracker[1] = Vars.SolarInput[1][Vars.SolarTracker[0]] * k_output + m_output
+                    Vars.SolarTracker[0] += 1
+            Vars.TSI = Vars.SolarTracker[1]
         if Base.Runtime_Tracker % (4 * Base.data_readout) == 0:
             Vars.SolarOutput[int(Base.Runtime_Tracker / (4 * Base.data_readout))] = Vars.TSI
         return 0

@@ -60,7 +60,9 @@ Functions to process variables during or after a simulation run are:
 """
 import numpy as np
 from qualname import qualname
-#import xarray as xr
+
+
+# import xarray as xr
 
 
 class Vars:
@@ -148,114 +150,114 @@ class Vars:
     """
 
     ###Running variables -- RK4###
-    t=float
-    T=float
-    T_global=float
+    t = float
+    T = float
+    T_global = float
 
-
-    ###Running variables### 
-    orbitals=float
-    solar=list
-    alpha=list
-    noise=float
-    ForcingTracker=[0,0]
-    CO2Tracker=[0,0]
-    SolarTracker=[0,0]
-    AODTracker=[0,0]
-    OrbitalTracker=[0,{'ecc': 0, 'long_peri': 0, 'obliquity': 0}]
-    meridional=list
+    ###Running variables###
+    orbitals = float
+    solar = list
+    alpha = list
+    noise = float
+    ForcingTracker = [0, 0]
+    CO2Tracker = [0, 0]
+    SolarTracker = [0, 0]
+    AODTracker = [0, 0]
+    OrbitalTracker = [0, {'ecc': 0, 'long_peri': 0, 'obliquity': 0}]
+    meridional = list
     tempdif = list
     TSI = None
     AOD = float
-    
+
     ###Static variables###
-    Lat=float
-    Lat2=float
-    orbtable=float
-    area=list
-    bounds=list
-    latlength=list
-    External_time_start=float
-    CO2_time_start=float
-    ExternalOrbitals_time_start=float
-    Solar_time_start=float
-    AOD_time_start=float
-    start_time=float
+    Lat = float
+    Lat2 = float
+    orbtable = float
+    area = list
+    bounds = list
+    latlength = list
+    External_time_start = float
+    CO2_time_start = float
+    ExternalOrbitals_time_start = float
+    Solar_time_start = float
+    AOD_time_start = float
+    start_time = float
 
     ###Storage variables###
-    cL=list
-    C=list
-    F=list
-    P=list
-    Transfer=list
-    BudTransfer=list
-    Rdown=list
-    Rup=list
-    ExternalOutput=list
-    ExternalInput=list
-    CO2Output=list  
-    CO2Input=list
-    ExternalOrbitals=list
-    SolarInput=list
-    SolarOutput=list
-    AODInput=list
-    AODOutput=list
-    
-    Read=dict #{'cL':cL, 'C': C, 'F': F,'P': P,'Transfer': Transfer,'alpha': alpha,'BudTransfer': BudTransfer,'Solar':,Noise,Rdown,Rup,ExternalOutput,CO2Forcing]
+    cL = list
+    C = list
+    F = list
+    P = list
+    Transfer = list
+    BudTransfer = list
+    Rdown = list
+    Rup = list
+    ExternalOutput = list
+    ExternalInput = list
+    CO2Output = list
+    CO2Input = list
+    ExternalOrbitals = list
+    SolarInput = list
+    SolarOutput = list
+    AODInput = list
+    AODOutput = list
+
+    Read = dict  # {'cL':cL, 'C': C, 'F': F,'P': P,'Transfer': Transfer,'alpha': alpha,'BudTransfer': BudTransfer,'Solar':,Noise,Rdown,Rup,ExternalOutput,CO2Forcing]
 
     ###Variables initial values### (for reset)
     def __init__(self):
-        self.t=float
-        self.T=float
-        self.T_global=float
-        self.Lat=float
-        self.Lat2=float
+        self.t = float
+        self.T = float
+        self.T_global = float
+        self.Lat = float
+        self.Lat2 = float
 
-        self.start_time=float
-        self.orbitals=float
-        self.orbtable=float
-        self.noise=float
-        self.ForcingTracker=[0,0]
-        self.CO2Tracker=[0,0]
-        self.SolarTracker=[0,0]
-        self.AODTracker=[0,0]
-        self.OrbitalTracker=[0,{'ecc': 0, 'long_peri': 0, 'obliquity': 0}]
-        self.meridional=list
+        self.start_time = float
+        self.orbitals = float
+        self.orbtable = float
+        self.noise = float
+        self.ForcingTracker = [0, 0]
+        self.CO2Tracker = [0, 0]
+        self.SolarTracker = [0, 0]
+        self.AODTracker = [0, 0]
+        self.OrbitalTracker = [0, {'ecc': 0, 'long_peri': 0, 'obliquity': 0}]
+        self.meridional = list
         self.tempdif = list
         self.TSI = None
         self.AOD = float
-        
-        self.solar=list
-        self.area=list
-        self.bounds=list
-        self.latlength=list
-        self.External_time_start=float
-        self.CO2_time_start=float
-        self.ExternalOrbitals_time_start=float
-        self.Solar_time_start=float
-        self.AOD_time_start=float
-        self.start_time=float
-    
-        self.cL=list
-        self.C=list
-        self.F=list
-        self.P=list
-        self.Transfer=list
-        self.BudTransfer=list
-        self.alpha=list
-        self.Rin=list
-        self.Rout=list
-        self.ExternalOutput=list 
-        self.ExternalInput=list
-        self.CO2Output=list
-        self.CO2Input=list
-        self.ExternalOrbitals=list
-        self.SolarInput=list
-        self.SolarOutput=list
-        self.AODInput=list
-        self.AODOutput=list
-        
-        self.Read=dict #[self.cL,self.C,self.F,self.P,self.Transfer,self.alpha,self.BudTransfer,self.Solar,self.Noise,self.Rin,self.Rout,self.ExternalOutput,self.CO2Forcing]
+
+        self.solar = list
+        self.area = list
+        self.bounds = list
+        self.latlength = list
+        self.External_time_start = float
+        self.CO2_time_start = float
+        self.ExternalOrbitals_time_start = float
+        self.Solar_time_start = float
+        self.AOD_time_start = float
+        self.start_time = float
+
+        self.cL = list
+        self.C = list
+        self.F = list
+        self.P = list
+        self.Transfer = list
+        self.BudTransfer = list
+        self.alpha = list
+        self.Rin = list
+        self.Rout = list
+        self.ExternalOutput = list
+        self.ExternalInput = list
+        self.CO2Output = list
+        self.CO2Input = list
+        self.ExternalOrbitals = list
+        self.SolarInput = list
+        self.SolarOutput = list
+        self.AODInput = list
+        self.AODOutput = list
+
+        self.Read = dict  # [self.cL,self.C,self.F,self.P,self.Transfer,self.alpha,self.BudTransfer,self.Solar,self.Noise,self.Rin,self.Rout,self.ExternalOutput,self.CO2Forcing]
+
 
 class Base():
     """
@@ -328,21 +330,22 @@ class Base():
     Noise_Tracker = 0
 
     parallelization = False
-    control=False
-    number_of_parameters=float
-    number_of_cycles=float
-    number_of_parallels=float
+    control = False
+    number_of_parameters = float
+    number_of_cycles = float
+    number_of_parallels = float
 
 
 def trackerreset():
     reset('ForcingTracker')
-    Vars.ForcingTracker=np.array([Vars.ForcingTracker for i in range(int(Base.number_of_externals))],dtype=object)
+    Vars.ForcingTracker = np.array([Vars.ForcingTracker for i in range(int(Base.number_of_externals))], dtype=object)
     reset('CO2Tracker')
     reset('SolarTracker')
     reset('OrbitalTracker')
     reset('AODTracker')
     reset('TSI')
-    
+
+
 def reset(x):
     """ 
     Resets the given variable to the initial value specified in Vars.__init__.        
@@ -354,8 +357,9 @@ def reset(x):
     :returns:                   No return
 
     """
-    classreset=Vars()
-    exec("Vars.%s=classreset.%s" % (x,x))
+    classreset = Vars()
+    exec("Vars.%s=classreset.%s" % (x, x))
+
 
 def datareset():
     """ 
@@ -375,14 +379,16 @@ def datareset():
     
     
     """
-    classreset=Vars()
-    Vars.t=classreset.t
-    Vars.T=classreset.T
-    Vars.T_global=classreset.T_global
-    Vars.Lat=classreset.Lat
-    Vars.Lat2=classreset.Lat2
+    classreset = Vars()
+    Vars.t = classreset.t
+    Vars.T = classreset.T
+    Vars.T_global = classreset.T_global
+    Vars.Lat = classreset.Lat
+    Vars.Lat2 = classreset.Lat2
 
-def variable_importer(config,initialZMT=True,control=False,parallel=False,parallel_config=0,accuracy=1e-3,accuracy_number=1000):
+
+def variable_importer(config, initialZMT=True, control=False, parallel=False, parallel_config=0, accuracy=1e-3,
+                      accuracy_number=1000):
     from .variables import Vars
     """ 
     Executes all relevant functions to import variables for a single simulation run. From the *configuration* dictionary, returned by ``configuration.importer``, the relevant information is extracted and the specific importer functions are executed in the following order:
@@ -402,12 +408,14 @@ def variable_importer(config,initialZMT=True,control=False,parallel=False,parall
     :returns:                   No return
 
     """
-    base_importer(config['rk4input'],control=control,parallel=parallel,parallel_config=parallel_config,accuracy=accuracy,accuracy_number=accuracy_number)
+    base_importer(config['rk4input'], control=control, parallel=parallel, parallel_config=parallel_config,
+                  accuracy=accuracy, accuracy_number=accuracy_number)
     trackerreset()
-    initial_importer(config['initials'],initialZMT=initialZMT)
+    initial_importer(config['initials'], initialZMT=initialZMT)
     output_importer(config['funccomp']['funclist'])
 
-def base_importer(rk4input,control=False,parallel=False,parallel_config=None,accuracy=1e-3,accuracy_number=1000):
+
+def base_importer(rk4input, control=False, parallel=False, parallel_config=None, accuracy=1e-3, accuracy_number=1000):
     """
     Adds the most relevant variables to the ``Base`` Class. This enables calling and writing variables globally and across different files.
 
@@ -458,39 +466,41 @@ def base_importer(rk4input,control=False,parallel=False,parallel_config=None,acc
     :returns:                   No return
     """
 
-    #Overview given in Readme.txt
-    keys=list(rk4input.keys())
-    values=list(rk4input.values())
+    # Overview given in Readme.txt
+    keys = list(rk4input.keys())
+    values = list(rk4input.values())
     for i in range(len(keys)):
-        exec("Base.%s=%f" % (keys[i],values[i]))
-    Base.Runtime_Tracker=0
-    Base.Readout_Tracker=0
-    Base.Noise_Tracker=0
-    if parallel==True:
-        Base.parallelization=True
+        exec("Base.%s=%f" % (keys[i], values[i]))
+    Base.Runtime_Tracker = 0
+    Base.Readout_Tracker = 0
+    Base.Noise_Tracker = 0
+    if parallel == True:
+        Base.parallelization = True
         if parallel_config is None:
-            print('Specify the parallelization configuration file!') 
-            
-        keys_parallel=list(parallel_config.keys())
-        values_parallel=list(parallel_config.values())
-        for i in range(len(keys_parallel)):
-            exec("Base.%s=%i" % (keys_parallel[i],values_parallel[i]))
-        
-    else:
-        Base.parallelization=False
-        
-    if control==True:
-        Base.control=True
-        Base.eq_condition=True
-        Base.number_of_integration=100000
-        Base.data_readout=1
-        Base.eq_condition_length=accuracy_number
-        Base.eq_condition_amplitude=accuracy
-        print('Starting controlrun with a temperature accuracy of %s K on the GMT over %s datapoints.' %(accuracy,accuracy_number))
-    else:
-        Base.control=False
+            print('Specify the parallelization configuration file!')
 
-def initial_importer(initials,initialZMT=True):
+        keys_parallel = list(parallel_config.keys())
+        values_parallel = list(parallel_config.values())
+        for i in range(len(keys_parallel)):
+            exec("Base.%s=%i" % (keys_parallel[i], values_parallel[i]))
+
+    else:
+        Base.parallelization = False
+
+    if control == True:
+        Base.control = True
+        Base.eq_condition = True
+        Base.number_of_integration = 100000
+        Base.data_readout = 1
+        Base.eq_condition_length = accuracy_number
+        Base.eq_condition_amplitude = accuracy
+        print('Starting controlrun with a temperature accuracy of %s K on the GMT over %s datapoints.' % (
+            accuracy, accuracy_number))
+    else:
+        Base.control = False
+
+
+def initial_importer(initials, initialZMT=True):
     """
     Calculates the initial conditions of the *primary variables* from the ``initials``-section.
 
@@ -505,73 +515,80 @@ def initial_importer(initials,initialZMT=True):
     from .functions import cosd, lna
     ###filling the running variables with values depending on the systemconfiguration in rk4input###
 
-    if Base.spatial_resolution==0:
-        dim=0
+    if Base.spatial_resolution == 0:
+        dim = 0
         print('0D')
-        Vars.T=initials['zmt']
+        Vars.T = initials['zmt']
     else:
-        dim=1
-       #NS==True corresponds to southpole to northpole representation (180 Degrees)
-        if Base.both_hemispheres==True:
-            Latrange=180
+        dim = 1
+        # NS==True corresponds to southpole to northpole representation (180 Degrees)
+        if Base.both_hemispheres == True:
+            Latrange = 180
 
-            #Checking if Temperature and Latitude is set on a latitudal circle (0°,10°,..if step=10)
-            #or on a latitudinal belt and therefore between the boundaries (5°,15°,..if step=10)
+            # Checking if Temperature and Latitude is set on a latitudal circle (0°,10°,..if step=10)
+            # or on a latitudinal belt and therefore between the boundaries (5°,15°,..if step=10)
 
-            #circle==True and belt==False says on the latitudinal circle
-            if Base.latitudinal_circle==True and Base.latitudinal_belt==False:
-                Vars.Lat=np.linspace(-90+Base.spatial_resolution,90-Base.spatial_resolution,int(Latrange/Base.spatial_resolution-1))
-                Vars.Lat2=np.linspace(-90,90-Base.spatial_resolution,int(Latrange/Base.spatial_resolution))+Base.spatial_resolution/2
-                if initialZMT==True:
-                    Vars.T=np.array([initials['zmt']]*int(Latrange/Base.spatial_resolution-1))
-                    #Checking if the Temperature for each latitude starts with the same value or a 
-                    #cosine shifted value range
-                    if initials['initial_temperature_cosine']==True:
-                        Vars.T=Vars.T+initials['initial_temperature_amplitude']*(cosd(Vars.Lat)-1)
+            # circle==True and belt==False says on the latitudinal circle
+            if Base.latitudinal_circle == True and Base.latitudinal_belt == False:
+                Vars.Lat = np.linspace(-90 + Base.spatial_resolution, 90 - Base.spatial_resolution,
+                                       int(Latrange / Base.spatial_resolution - 1))
+                Vars.Lat2 = np.linspace(-90, 90 - Base.spatial_resolution,
+                                        int(Latrange / Base.spatial_resolution)) + Base.spatial_resolution / 2
+                if initialZMT == True:
+                    Vars.T = np.array([initials['zmt']] * int(Latrange / Base.spatial_resolution - 1))
+                    # Checking if the Temperature for each latitude starts with the same value or a
+                    # cosine shifted value range
+                    if initials['initial_temperature_cosine'] == True:
+                        Vars.T = Vars.T + initials['initial_temperature_amplitude'] * (cosd(Vars.Lat) - 1)
 
-            #circle==False and belt==True say on the latitudinal belt
-            if Base.latitudinal_circle==False and Base.latitudinal_belt==True:
-                Vars.Lat2=np.linspace(-90+Base.spatial_resolution,90-Base.spatial_resolution,int(Latrange/Base.spatial_resolution-1))
-                Vars.Lat=np.linspace(-90,90-Base.spatial_resolution,int(Latrange/Base.spatial_resolution))+Base.spatial_resolution/2
-                if initialZMT==True:
-                    Vars.T=np.array([initials['zmt']]*int(Latrange/Base.spatial_resolution))
-                    if initials['initial_temperature_cosine']==True:
-                        if initials['initial_temperature_noise']==True:
-                            z=[0]*len(Vars.Lat)
+            # circle==False and belt==True say on the latitudinal belt
+            if Base.latitudinal_circle == False and Base.latitudinal_belt == True:
+                Vars.Lat2 = np.linspace(-90 + Base.spatial_resolution, 90 - Base.spatial_resolution,
+                                        int(Latrange / Base.spatial_resolution - 1))
+                Vars.Lat = np.linspace(-90, 90 - Base.spatial_resolution,
+                                       int(Latrange / Base.spatial_resolution)) + Base.spatial_resolution / 2
+                if initialZMT == True:
+                    Vars.T = np.array([initials['zmt']] * int(Latrange / Base.spatial_resolution))
+                    if initials['initial_temperature_cosine'] == True:
+                        if initials['initial_temperature_noise'] == True:
+                            z = [0] * len(Vars.Lat)
                             for k in range(len(Vars.Lat)):
-                                z[k]=np.random.normal(0,initials['initial_temperature_noise_amplitude'])
-                        else: 
-                            z=0
-                        Vars.T=Vars.T+initials['initial_temperature_amplitude']*(cosd(Vars.Lat)-1)+lna(z)
+                                z[k] = np.random.normal(0, initials['initial_temperature_noise_amplitude'])
+                        else:
+                            z = 0
+                        Vars.T = Vars.T + initials['initial_temperature_amplitude'] * (cosd(Vars.Lat) - 1) + lna(z)
 
-        #Not from southpole to northpole rather equator to pole
+        # Not from southpole to northpole rather equator to pole
         else:
-            Latrange=90     
-            if Base.latitudinal_circle==True and Base.latitudinal_belt==False:
-                Vars.Lat=np.linspace(0,90-Base.spatial_resolution,int(Latrange/Base.spatial_resolution))
-                Vars.Lat2=np.linspace(0,90-Base.spatial_resolution,int(Latrange/Base.spatial_resolution))+Base.spatial_resolution/2
-                if initialZMT==True:
-                    Vars.T=np.array([initials['zmt']]*int(Latrange/Base.spatial_resolution))
-                    if initials['initial_temperature_cosine']==True:
-                        Vars.T=Vars.T+initials['initial_temperature_amplitude']*(cosd(Vars.Lat)-1)
-            if Base.latitudinal_circle==False and Base.latitudinal_belt==True:
-                Vars.Lat2=np.linspace(0,90-Base.spatial_resolution,int(Latrange/Base.spatial_resolution))
-                Vars.Lat=np.linspace(0,90-Base.spatial_resolution,int(Latrange/Base.spatial_resolution))+Base.spatial_resolution/2
-                if initialZMT==True:
-                    Vars.T=np.array([initials['zmt']]*int(Latrange/Base.spatial_resolution))
-                    if initials['initial_temperature_cosine']==True:
-                        Vars.T=Vars.T+initials['initial_temperature_amplitude']*(cosd(Vars.Lat)-1)
-    
-    Vars.t=initials['time'] 
-    if Base.parallelization==True:
-        if initialZMT==True:
-            Vars.T=np.array([Vars.T]*Base.number_of_parallels)
-        Vars.T_global=np.array([initials['gmt']]*Base.number_of_parallels)
+            Latrange = 90
+            if Base.latitudinal_circle == True and Base.latitudinal_belt == False:
+                Vars.Lat = np.linspace(0, 90 - Base.spatial_resolution, int(Latrange / Base.spatial_resolution))
+                Vars.Lat2 = np.linspace(0, 90 - Base.spatial_resolution,
+                                        int(Latrange / Base.spatial_resolution)) + Base.spatial_resolution / 2
+                if initialZMT == True:
+                    Vars.T = np.array([initials['zmt']] * int(Latrange / Base.spatial_resolution))
+                    if initials['initial_temperature_cosine'] == True:
+                        Vars.T = Vars.T + initials['initial_temperature_amplitude'] * (cosd(Vars.Lat) - 1)
+            if Base.latitudinal_circle == False and Base.latitudinal_belt == True:
+                Vars.Lat2 = np.linspace(0, 90 - Base.spatial_resolution, int(Latrange / Base.spatial_resolution))
+                Vars.Lat = np.linspace(0, 90 - Base.spatial_resolution,
+                                       int(Latrange / Base.spatial_resolution)) + Base.spatial_resolution / 2
+                if initialZMT == True:
+                    Vars.T = np.array([initials['zmt']] * int(Latrange / Base.spatial_resolution))
+                    if initials['initial_temperature_cosine'] == True:
+                        Vars.T = Vars.T + initials['initial_temperature_amplitude'] * (cosd(Vars.Lat) - 1)
+
+    Vars.t = initials['time']
+    if Base.parallelization == True:
+        if initialZMT == True:
+            Vars.T = np.array([Vars.T] * Base.number_of_parallels)
+        Vars.T_global = np.array([initials['gmt']] * Base.number_of_parallels)
     else:
-        Vars.T_global=initials['gmt']
+        Vars.T_global = initials['gmt']
+
 
 def output_importer(functiondict):
-    functionlist=list(functiondict.values())
+    functionlist = list(functiondict.values())
     """
     Creates empty lists for the storage-variables which will be filled during the simulation.
 
@@ -579,58 +596,60 @@ def output_importer(functiondict):
 
     """
     if (Base.number_of_integration) % Base.data_readout == 0:
-        #Assigning dynamical variables in Variables Package with initial values from var
+        # Assigning dynamical variables in Variables Package with initial values from var
         for func in functionlist:
-            if qualname(func)=='transfer.sellers':
-                Vars.cL=np.array([0]*int(Base.number_of_integration/Base.data_readout),dtype=object)
-                Vars.C=np.array([0]*int(Base.number_of_integration/Base.data_readout),dtype=object)
-                Vars.F=np.array([0]*int(Base.number_of_integration/Base.data_readout),dtype=object)
-                Vars.P=np.array([0]*int(Base.number_of_integration/Base.data_readout),dtype=object)
-                Vars.Transfer=np.array([0]*int(Base.number_of_integration/Base.data_readout),dtype=object)
-            if qualname(func)=='transfer.budyko':
-                Vars.BudTransfer=np.array([0]*int(Base.number_of_integration/Base.data_readout),dtype=object)
-            if qualname(func)=='forcing.co2_myhre':
-                Vars.CO2Output=np.array([0]*int(Base.number_of_integration/Base.data_readout),dtype=object)
-            if qualname(func)=='forcing.solar':                
-                Vars.SolarOutput=np.array([0]*int(Base.number_of_integration/Base.data_readout),dtype=object)
-            if qualname(func)=='forcing.aod':            
-                Vars.AODOutput==np.array([0]*int(Base.number_of_integration/Base.data_readout),dtype=object)
-                
-        Vars.ExternalOutput=np.array([0]*int(Base.number_of_integration/Base.data_readout),dtype=object)
-        Vars.alpha=np.array([0]*int(Base.number_of_integration/Base.data_readout),dtype=object)
-        Vars.solar=np.array([0]*int(Base.number_of_integration/Base.data_readout),dtype=object)
-        Vars.noise=np.array([0]*int(Base.number_of_integration/Base.data_readout),dtype=object)
-        Vars.Rdown=np.array([0]*int(Base.number_of_integration/Base.data_readout),dtype=object)
-        #Vars.Rup=np.reshape(np.zeros(int(Base.number_of_integration/Base.data_readout)*len(Vars.Lat)),(int(Base.number_of_integration/Base.data_readout),len(Vars.Lat)))
-        Vars.Rup=np.array([0]*int(Base.number_of_integration/Base.data_readout),dtype=object)
-    else: 
+            if qualname(func) == 'transfer.sellers':
+                Vars.cL = np.array([0] * int(Base.number_of_integration / Base.data_readout), dtype=object)
+                Vars.C = np.array([0] * int(Base.number_of_integration / Base.data_readout), dtype=object)
+                Vars.F = np.array([0] * int(Base.number_of_integration / Base.data_readout), dtype=object)
+                Vars.P = np.array([0] * int(Base.number_of_integration / Base.data_readout), dtype=object)
+                Vars.Transfer = np.array([0] * int(Base.number_of_integration / Base.data_readout), dtype=object)
+            if qualname(func) == 'transfer.budyko':
+                Vars.BudTransfer = np.array([0] * int(Base.number_of_integration / Base.data_readout), dtype=object)
+            if qualname(func) == 'forcing.co2_myhre':
+                Vars.CO2Output = np.array([0] * int(Base.number_of_integration / Base.data_readout), dtype=object)
+            if qualname(func) == 'forcing.solar':
+                Vars.SolarOutput = np.array([0] * int(Base.number_of_integration / Base.data_readout), dtype=object)
+            if qualname(func) == 'forcing.aod':
+                Vars.AODOutput == np.array([0] * int(Base.number_of_integration / Base.data_readout), dtype=object)
+
+        Vars.ExternalOutput = np.array([0] * int(Base.number_of_integration / Base.data_readout), dtype=object)
+        Vars.alpha = np.array([0] * int(Base.number_of_integration / Base.data_readout), dtype=object)
+        Vars.solar = np.array([0] * int(Base.number_of_integration / Base.data_readout), dtype=object)
+        Vars.noise = np.array([0] * int(Base.number_of_integration / Base.data_readout), dtype=object)
+        Vars.Rdown = np.array([0] * int(Base.number_of_integration / Base.data_readout), dtype=object)
+        # Vars.Rup=np.reshape(np.zeros(int(Base.number_of_integration/Base.data_readout)*len(Vars.Lat)),(int(Base.number_of_integration/Base.data_readout),len(Vars.Lat)))
+        Vars.Rup = np.array([0] * int(Base.number_of_integration / Base.data_readout), dtype=object)
+    else:
         for func in functionlist:
-            if qualname(func)=='transfer.sellers':
-                Vars.cL=np.array([0]*int(Base.number_of_integration/Base.data_readout+1),dtype=object)
-                Vars.C=np.array([0]*int(Base.number_of_integration/Base.data_readout+1),dtype=object)
-                Vars.F=np.array([0]*int(Base.number_of_integration/Base.data_readout+1),dtype=object)
-                Vars.P=np.array([0]*int(Base.number_of_integration/Base.data_readout+1),dtype=object)
-                Vars.Transfer=np.array([0]*int(Base.number_of_integration/Base.data_readout+1),dtype=object)
-            if qualname(func)=='transfer.budyko':
-                Vars.BudTransfer=np.array([0]*int(Base.number_of_integration/Base.data_readout+1),dtype=object)
-            if qualname(func)=='forcing.co2_myhre':
-                Vars.CO2Output=np.array([0]*int(Base.number_of_integration/Base.data_readout+1),dtype=object)
-            if qualname(func)=='forcing.solar':                
-                Vars.SolarOutput=np.array([0]*int(Base.number_of_integration/Base.data_readout+1),dtype=object)
-            if qualname(func)=='forcing.aod':            
-                Vars.AODOutput==np.array([0]*int(Base.number_of_integration/Base.data_readout+1),dtype=object)
-                
-        Vars.ExternalOutput=np.array([0]*int(Base.number_of_integration/Base.data_readout+1),dtype=object)
-        Vars.alpha=np.array([0]*int(Base.number_of_integration/Base.data_readout+1),dtype=object)
-        Vars.solar=np.array([0]*int(Base.number_of_integration/Base.data_readout+1),dtype=object)
-        Vars.noise=np.array([0]*int(Base.number_of_integration/Base.data_readout+1),dtype=object)
-        Vars.Rdown=np.array([0]*int(Base.number_of_integration/Base.data_readout+1),dtype=object)
-        #Vars.Rup=np.reshape(np.zeros(int(Base.number_of_integration/Base.data_readout)*len(Vars.Lat)),(int(Base.number_of_integration/Base.data_readout),len(Vars.Lat)))
-        Vars.Rup=np.array([0]*int(Base.number_of_integration/Base.data_readout+1),dtype=object)
-        
-    
-    Vars.ExternalOutput=np.array([Vars.ExternalOutput for i in range(int(Base.number_of_externals))],dtype=object)
-    Vars.External_time_start=np.array([0 for i in range(int(Base.number_of_externals))],dtype=object)
-    Vars.ForcingTracker=np.array([[0,0] for i in range(int(Base.number_of_externals))],dtype=object)
-    Vars.ExternalInput=np.array([0 for i in range(int(Base.number_of_externals))],dtype=object)
-    Vars.Read={'cL': Vars.cL,'C': Vars.C,'F': Vars.F,'P': Vars.P,'Transfer': Vars.Transfer,'alpha': Vars.alpha,'BudTransfer': Vars.BudTransfer, 'solar': Vars.solar,'noise': Vars.noise,'Rdown': Vars.Rdown,'Rup': Vars.Rup, 'ExternalOutput': Vars.ExternalOutput,'CO2Output': Vars.CO2Output,'SolarOutput':Vars.SolarOutput,'AODOutput':Vars.AODOutput}
+            if qualname(func) == 'transfer.sellers':
+                Vars.cL = np.array([0] * int(Base.number_of_integration / Base.data_readout + 1), dtype=object)
+                Vars.C = np.array([0] * int(Base.number_of_integration / Base.data_readout + 1), dtype=object)
+                Vars.F = np.array([0] * int(Base.number_of_integration / Base.data_readout + 1), dtype=object)
+                Vars.P = np.array([0] * int(Base.number_of_integration / Base.data_readout + 1), dtype=object)
+                Vars.Transfer = np.array([0] * int(Base.number_of_integration / Base.data_readout + 1), dtype=object)
+            if qualname(func) == 'transfer.budyko':
+                Vars.BudTransfer = np.array([0] * int(Base.number_of_integration / Base.data_readout + 1), dtype=object)
+            if qualname(func) == 'forcing.co2_myhre':
+                Vars.CO2Output = np.array([0] * int(Base.number_of_integration / Base.data_readout + 1), dtype=object)
+            if qualname(func) == 'forcing.solar':
+                Vars.SolarOutput = np.array([0] * int(Base.number_of_integration / Base.data_readout + 1), dtype=object)
+            if qualname(func) == 'forcing.aod':
+                Vars.AODOutput == np.array([0] * int(Base.number_of_integration / Base.data_readout + 1), dtype=object)
+
+        Vars.ExternalOutput = np.array([0] * int(Base.number_of_integration / Base.data_readout + 1), dtype=object)
+        Vars.alpha = np.array([0] * int(Base.number_of_integration / Base.data_readout + 1), dtype=object)
+        Vars.solar = np.array([0] * int(Base.number_of_integration / Base.data_readout + 1), dtype=object)
+        Vars.noise = np.array([0] * int(Base.number_of_integration / Base.data_readout + 1), dtype=object)
+        Vars.Rdown = np.array([0] * int(Base.number_of_integration / Base.data_readout + 1), dtype=object)
+        # Vars.Rup=np.reshape(np.zeros(int(Base.number_of_integration/Base.data_readout)*len(Vars.Lat)),(int(Base.number_of_integration/Base.data_readout),len(Vars.Lat)))
+        Vars.Rup = np.array([0] * int(Base.number_of_integration / Base.data_readout + 1), dtype=object)
+
+    Vars.ExternalOutput = np.array([Vars.ExternalOutput for i in range(int(Base.number_of_externals))], dtype=object)
+    Vars.External_time_start = np.array([0 for i in range(int(Base.number_of_externals))], dtype=object)
+    Vars.ForcingTracker = np.array([[0, 0] for i in range(int(Base.number_of_externals))], dtype=object)
+    Vars.ExternalInput = np.array([0 for i in range(int(Base.number_of_externals))], dtype=object)
+    Vars.Read = {'cL': Vars.cL, 'C': Vars.C, 'F': Vars.F, 'P': Vars.P, 'Transfer': Vars.Transfer, 'alpha': Vars.alpha,
+                 'BudTransfer': Vars.BudTransfer, 'solar': Vars.solar, 'noise': Vars.noise, 'Rdown': Vars.Rdown,
+                 'Rup': Vars.Rup, 'ExternalOutput': Vars.ExternalOutput, 'CO2Output': Vars.CO2Output,
+                 'SolarOutput': Vars.SolarOutput, 'AODOutput': Vars.AODOutput}

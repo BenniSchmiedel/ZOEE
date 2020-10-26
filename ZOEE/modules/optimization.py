@@ -6,21 +6,21 @@ The gradient descent method estimates better fitting parameters with
 
 .. math::
 
-    P_{n+1}= P_{n} - \gamma_n \cdot \nabla F_n (P_{n}),\;\; n\geq 0
+    P_{n+1}= P_{n} - \gamma_n \cdot \nabla S_n (P_{n}),\;\; n\geq 0
 
-where :math:`P` is a set of initial parameters :math:`\gamma` the learning rate and :math:`\nabla F` the gradient of the least squares, each of the optimizationimization step *i*, which are calculated as follows:
+where :math:`P` is a set of initial parameters :math:`\gamma` the learning rate and :math:`\nabla S` the gradient of the least squares, each of the optimizationimization step *i*, which are calculated as follows:
 
 .. math::
 
-    \gamma =& \\frac{|(P_{n}-P_{n-1})\cdot (dF_{n}-dF_{n-1})|}{||(dF_n-dF_{n-1})||^2}\\\\
-    F=& \sum_{k=0}^{\tile{k}} (T_{data}-T_{target})^2\\\\
-    dF=&\\frac{dF}{dP}
+    \gamma =& \\frac{|(P_{n}-P_{n-1})\cdot (dS_{n}-dS_{n-1})|}{||(dS_n-dS_{n-1})||^2}\\\\
+    S=& \sum_{k=0}^{\tile{k}} (T_{data}-T_{target})^2\\\\
+    dS=&\\frac{dS}{dP}
 
 As this algorithm is applied to optimizationimize the cost function of a multivariate parameter space, all parameters are normalized to avoid unit errors and allow to set climatological boundaries (Pmin and Pmax). When the algorithm is run to optimizationimize a coupled target (ZMT and GMT) the cost functions from each target comparison are weighted with a climatology-to-response ratio :math:'0\leq r_{CR} \leq 1'. 
 
 .. math::
 
-    F_{total}=r_{CR}\cdot F_{Climatology}+(1-r_{CR})\cdot F_{Response}
+    S_{total}=r_{CR}\cdot S_{Climatology}+(1-r_{CR})\cdot S_{Response}
 
 When the algorithm is run is operates the following scheme: 1) Run the model to an equilibrium state. 2) Calculate cost-function (squared residuals). 3) Calculate the cost-function gradient. 4) Calculate learning rate :math:'\gamma'. 5) Estimate next step parameters. 6) Limit new parameters to climatologic boundary conditions. 
 """
@@ -29,9 +29,10 @@ import numpy as np
 
 class optimization:
 
-    def __init__(self, mode='Coupled', target=0, ZMT_response=True, GMT_response=True, num_steps=10, num_data=None,
+    def __init__(self, mode='Coupled', target=0, ZMT_response=True, GMT_response=True, response_average_length=1,
+                 num_steps=10, num_data=None,
                  gamma0=1e-8,
-                 cost_function_type='LeastSquare', cost_ratio=0.5, ZMT=0, GMT=0,
+                 cost_function_type='LeastSquare', cost_weight='mean', cost_ratio=0.5, ZMT=0, GMT=0,
                  precision=0, grid=None):
 
         self.num_steps = num_steps  # How many optimization steps
@@ -39,6 +40,7 @@ class optimization:
         self.num_data = num_data  # How many datapoints from the model (in time)
         self.target = target  # Target data
         self.gamma0 = gamma0  # Initial gamma (stepsize)
+        self.cost_weight = cost_weight  # cost function weight type between ZMT and GMT
         self.cost_ratio = cost_ratio  # ratio between ZMT and GMT
         self.ZMT_initial = ZMT  # Initial ZMT
         self.GMT_initial = GMT  # Initial GMT
@@ -47,6 +49,7 @@ class optimization:
         self.grid = grid  # Grid (1D latitude resolution)
         self.ZMT_response = ZMT_response  # GMT response/anomaly or not
         self.GMT_response = GMT_response  # GMT response/anomaly or not
+        self.response_average_length = response_average_length  # Number of Datapoints to be averaged to response
 
         self.current_step = 0
 
@@ -93,8 +96,8 @@ class optimization:
         self._test_for_parameters()
 
         # create arrays
-        F = np.zeros((self.num_steps, self.parallels))
-        dF = np.zeros((self.num_steps, self.num_paras))
+        S = np.zeros((self.num_steps, self.parallels))
+        dS = np.zeros((self.num_steps, self.num_paras))
         P = np.zeros((self.num_steps, self.num_paras))
         Ptrans = np.zeros((self.num_steps, self.num_paras))
         gamma = np.zeros(self.num_steps)
@@ -133,34 +136,35 @@ class optimization:
 
                 target_ZMT = self.target['ZMT']
                 target_GMT = self.target['GMT']
-                F_ZMT = self.target_comparison(dataout_ZMT[i], 'ZMT', target_ZMT)
-                F_GMT = self.target_comparison(dataout_GMT[i], 'GMT', target_GMT)
-                F[i] = self.cost_ratio * F_ZMT + (1 - self.cost_ratio) * F_GMT
+                S_ZMT = self.target_comparison(dataout_ZMT[i], 'ZMT', target_ZMT)
+                S_GMT = self.target_comparison(dataout_GMT[i], 'GMT', target_GMT)
+                # S[i] = self.cost_ratio * S_ZMT + (1 - self.cost_ratio) * S_GMT
+                S[i] = self.cost_weighting(S_ZMT, S_GMT, self.cost_weight)
             else:
                 dataout[i] = data
-                F[i] = self.target_comparison(dataout[i], self.mode, self.target)
+                S[i] = self.target_comparison(dataout[i], self.mode, self.target)
 
             # Calculate the gradient of the costfunction
-            dF[i] = self._get_gradient(F[i])
+            dS[i] = self._get_gradient(S[i])
 
             # Calculate the gamma-factor (learning rate)
             if i == 0:
                 gamma[i] = self.gamma0
             else:
-                gamma[i] = self._get_stepsize(dF[i - 1], dF[i], Ptrans[i - 1], Ptrans[i])
+                gamma[i] = self._get_stepsize(dS[i - 1], dS[i], Ptrans[i - 1], Ptrans[i])
 
             # Check if a certain precision is reached, if so, break the loop and return optimization data.
-            if self._precision_check(dF[0], dF[i]):
+            if self._precision_check(dS[0], dS[i]):
                 print('stop', i)
                 P = P[:i]
                 Ptrans = Ptrans[:i]
-                F = F[:i]
-                dF = dF[:i]
+                S = S[:i]
+                dS = dS[:i]
                 gamma = gamma[:i]
                 break
 
             # Calculate new parameters from gamma and costfunction gradient dF
-            Ptrans_next = self._new_parameters(Ptrans[i], gamma[i], dF[i])
+            Ptrans_next = self._new_parameters(Ptrans[i], gamma[i], dS[i])
 
             # If new parameters are out of the climatological boundary, force them to the exceeded boundary (0 for minimum or 1 for maximum)
             for k in range(self.num_paras):
@@ -173,7 +177,7 @@ class optimization:
             if i < self.num_steps - 1:
                 Ptrans[i + 1] = Ptrans_next
                 P[i + 1] = self.P_min + Ptrans_next * (self.P_max - self.P_min)
-                print(F[i])
+                print(S[i])
                 print(gamma[i])
                 print(P[i + 1])
 
@@ -181,7 +185,7 @@ class optimization:
 
         if self.mode == 'Coupled':
             dataout = [dataout_ZMT, dataout_GMT]
-        return F, dF, P, Ptrans, gamma, dataout
+        return S, dS, P, Ptrans, gamma, dataout
 
     def target_comparison(self, data, mode, target):
         S_i = np.zeros(self.parallels)
@@ -202,24 +206,39 @@ class optimization:
 
         return S_i
 
-    def _get_gradient(self, F):
-        dF = np.zeros(self.num_paras)
-        for k in range(self.num_paras):
-            dF[k] = (F[2 * k + 2] - F[2 * k + 1]) / (2 * self.P_ratio)
-        return dF
+    def cost_weighting(self, S_ZMT, S_GMT, ctype):
+        if ctype == 'mean':
+            S = np.mean([S_ZMT, S_GMT], axis=0)
 
-    def _get_stepsize(self, dF0, dF1, P0, P1):
-        gamma = np.abs(np.dot(P1 - P0, dF1 - dF0) / np.dot(np.abs(dF1 - dF0), np.abs(dF1 - dF0)))
+        elif ctype == 'cross_weight':
+            S = 2 * S_ZMT * S_GMT / (S_ZMT + S_GMT)
+
+        elif ctype == 'ratio':
+            S = self.cost_ratio * S_ZMT + (1 - self.cost_ratio) * S_GMT
+
+        else:
+            raise Exception('Unkown cost function GMT-ZMT weighting: ' + ctype)
+
+        return S
+
+    def _get_gradient(self, S):
+        dS = np.zeros(self.num_paras)
+        for k in range(self.num_paras):
+            dS[k] = (S[2 * k + 2] - S[2 * k + 1]) / (2 * self.P_ratio)
+        return dS
+
+    def _get_stepsize(self, dS0, dS1, P0, P1):
+        gamma = np.abs(np.dot(P1 - P0, dS1 - dS0) / np.dot(np.abs(dS1 - dS0), np.abs(dS1 - dS0)))
         return gamma
 
-    def _precision_check(self, dF0, dF):
-        dFabs = np.sqrt(np.dot(dF, dF))
-        dF0abs = np.sqrt(np.dot(dF0, dF0))
-        if dFabs / dF0abs <= self.precision:
+    def _precision_check(self, dS0, dS):
+        dSabs = np.sqrt(np.dot(dS, dS))
+        dS0abs = np.sqrt(np.dot(dS0, dS0))
+        if dSabs / dS0abs <= self.precision:
             return True
 
-    def _new_parameters(self, P, gamma, dF):
-        P_next = P - gamma * dF
+    def _new_parameters(self, P, gamma, dS):
+        P_next = P - gamma * dS
         return P_next
 
     def run_model(self, model, model_config, P):
@@ -257,7 +276,7 @@ class optimization:
             if np.shape(self.GMT_initial) != (self.parallels,):
                 raise Exception('GMT_initial shape not understood')
 
-        data_CTRL = model.run(model_config, P_config, self.mode, self.ZMT_initial, self.GMT_initial, control=True)
+        data_CTRL = model.run(model_config, P_config, self.ZMT_initial, self.GMT_initial, control=True)
         # self.ZMT_initial, self.GMT_initial, ZMT_out = data_CTRL[0][-1], data_CTRL[1][-1], data_CTRL[2]
         ZMT_out = data_CTRL[2]
         ZMT_CTRL = data_CTRL[0][-1]
@@ -276,7 +295,7 @@ class optimization:
             # if not control and self.current_step == 0:
             #    ZMT = np.tile(self.ZMT_initial, (self.parallels, 1))
             #    GMT = np.tile(self.GMT_initial, self.parallels)
-            data_FULL = model.run(model_config, P_config, self.mode, ZMT_CTRL, self.GMT_initial, control=False)
+            data_FULL = model.run(model_config, P_config, ZMT_CTRL, self.GMT_initial, control=False)
 
             if np.shape(data_FULL[1]) != (self.num_data, self.parallels):
                 raise Exception("GMT output from " + str(model) + " in FULL should have shape (len(parallels) ,\
@@ -296,7 +315,7 @@ class optimization:
                 data_out = ZMT_out
         elif self.mode == 'GMT':
             if self.GMT_response:
-                data_out = np.transpose(data_FULL[1] - data_FULL[1][0])
+                data_out = np.transpose(data_FULL[1] - np.mean(data_FULL[1][:self.response_average_length], axis=0))
             else:
                 data_out = np.transpose(data_FULL[1])
         elif self.mode == 'Coupled':
@@ -308,7 +327,7 @@ class optimization:
             else:
                 dataZMT = ZMT_out
             if self.GMT_response:
-                dataGMT = np.transpose(data_FULL[1] - data_FULL[1][0])
+                dataGMT = np.transpose(data_FULL[1] - np.mean(data_FULL[1][:self.response_average_length], axis=0))
             else:
                 dataGMT = np.transpose(data_FULL[1])
             data_out = [dataZMT, dataGMT]
