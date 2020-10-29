@@ -117,7 +117,7 @@ class optimization:
                 'Optimization mode unknown, please use one of the following: ZMT, GMT, GMT_Single or Coupled')
 
         # The algorithm starts, loop over the number of optimizationimizationsteps "maxlength"
-        for i in tnrange(self.num_steps):
+        for i in range(self.num_steps):
             # first step: Calculate normalized parameters and their pertubation
             print('Iteration no.' + str(i))
             if i == 0:
@@ -177,9 +177,8 @@ class optimization:
             if i < self.num_steps - 1:
                 Ptrans[i + 1] = Ptrans_next
                 P[i + 1] = self.P_min + Ptrans_next * (self.P_max - self.P_min)
-                print(S[i])
-                print(gamma[i])
-                print(P[i + 1])
+                # print(S[0])
+                # print(P[i + 1])
 
             self.current_step += 1
 
@@ -408,7 +407,7 @@ class ZOEE_optimization:
         config = overwrite_parameters(config, P_config, self.num_params, self.labels, self.levels)
 
         Vars.T, Vars.T_global = ZMT, GMT
-        data = rk4alg(config, progressbar=True, monthly=self.monthly)
+        data = rk4alg(config, progressbar=False, monthly=self.monthly)
         if control:
             if self.elevation:
                 data_out = [data[1], data[2][1:], data[1][-1] + self.elevation_values]
