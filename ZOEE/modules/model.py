@@ -53,6 +53,9 @@ def model_equation(eqparam, funccomp):
         if Base.control:
             if qualname(funclist[funcnum]) == 'forcing.solar' and Base.Runtime_Tracker == 0:
                 y += funclist[funcnum](funcparam[funcnum])
+            elif qualname(funclist[funcnum]) == 'forcing.co2_myhre' and Base.Runtime_Tracker == 0:
+                y += funclist[funcnum](funcparam[funcnum])
+
             elif qualname(funclist[funcnum])[:7] == 'forcing':
                 pass
             else:

@@ -1786,6 +1786,7 @@ class forcing:
                 Vars.CO2Input[0] = np.flip(Vars.CO2Input[0], axis=0)
                 Vars.CO2Input[1] = np.flip(Vars.CO2Input[1], axis=0)
             Vars.CO2Tracker[1] = A * (np.log(CO2_base / C_0))
+
         while Vars.t > Vars.CO2Input[0][Vars.CO2Tracker[0]]:
             if Vars.CO2Tracker[0] == (len(Vars.CO2Input[0]) - 1):
                 Vars.CO2Tracker[1] = A * (np.log(CO2_base / C_0))

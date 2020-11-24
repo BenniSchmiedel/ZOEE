@@ -116,16 +116,17 @@ class optimization:
             raise Exception(
                 'Optimization mode unknown, please use one of the following: ZMT, GMT, GMT_Single or Coupled')
 
-        # The algorithm starts, loop over the number of optimizationimizationsteps "maxlength"
+        # The algorithm starts, loop over the number of optimizationsteps num_steps
+
+        # first step: Calculate normalized parameters and their pertubation
+        P[0] = self.P_initial
+        Ptrans[0] = (self.P_initial - self.P_min) / (self.P_max - self.P_min)
+
         for i in range(self.num_steps):
-            # first step: Calculate normalized parameters and their pertubation
             print('Iteration no.' + str(i))
-            if i == 0:
-                P[i] = self.P_initial
-                Ptrans[i] = (self.P_initial - self.P_min) / (self.P_max - self.P_min)
 
             # ********************* Interface function for the model used to simulate******************
-            # run the model to create the model data which is compared with the target. Two outputs if mode is coupled.
+            # run the model to create the simulation data which is compared with the target.
             data = self.run_model(model, model_config, P[i])
             # ********************************************************************************
 
@@ -166,7 +167,8 @@ class optimization:
             # Calculate new parameters from gamma and costfunction gradient dF
             Ptrans_next = self._new_parameters(Ptrans[i], gamma[i], dS[i])
 
-            # If new parameters are out of the climatological boundary, force them to the exceeded boundary (0 for minimum or 1 for maximum)
+            # If new parameters are out of the climatological boundary,
+            # force them to the boundary value (0 for minimum or 1 for maximum)
             for k in range(self.num_paras):
                 if Ptrans_next[k] < 0:
                     Ptrans_next[k] = 0.
@@ -184,6 +186,7 @@ class optimization:
 
         if self.mode == 'Coupled':
             dataout = [dataout_ZMT, dataout_GMT]
+
         return S, dS, P, Ptrans, gamma, dataout
 
     def target_comparison(self, data, mode, target):
@@ -275,33 +278,20 @@ class optimization:
             if np.shape(self.GMT_initial) != (self.parallels,):
                 raise Exception('GMT_initial shape not understood')
 
-        data_CTRL = model.run(model_config, P_config, self.ZMT_initial, self.GMT_initial, control=True)
-        # self.ZMT_initial, self.GMT_initial, ZMT_out = data_CTRL[0][-1], data_CTRL[1][-1], data_CTRL[2]
-        ZMT_out = data_CTRL[2]
-        ZMT_CTRL = data_CTRL[0][-1]
+        # ****************
+        # Class is called here. Output of run() should be [ ZMT_final_step + elevation, GMT ]
+        # The Dimensions of the Data should be: ZMT = (parallel, grid)    GMT = (datapoints, parallel)
+        ZMT_out, GMT_out = model.run(model_config, P_config, self.ZMT_initial, self.GMT_initial)
+        # ****************
 
         # Check dimension
-        if np.shape(data_CTRL[1][-1]) != (self.parallels,):
-            raise Exception("GMT output from " + str(model) + " in CTRL should have shape (len(parallels), ) \
-             but instead has" + str(np.shape(data_CTRL[1][-1])))
-        if np.shape(data_CTRL[0][-1]) != (self.parallels, len(self.grid)):
-            raise Exception("ZMT output from " + str(model) + " in CTRL should have shape (len(parallels) ,\
-             len(grid)) but instead has" + str(np.shape(data_CTRL[0][-1])))
-
-        # Then run full simulation with new parameter set
-        # control = False
         if self.mode == 'Coupled' or self.mode == 'GMT':
-            # if not control and self.current_step == 0:
-            #    ZMT = np.tile(self.ZMT_initial, (self.parallels, 1))
-            #    GMT = np.tile(self.GMT_initial, self.parallels)
-            data_FULL = model.run(model_config, P_config, ZMT_CTRL, self.GMT_initial, control=False)
-
-            if np.shape(data_FULL[1]) != (self.num_data, self.parallels):
-                raise Exception("GMT output from " + str(model) + " in FULL should have shape (len(parallels) ,\
-                 len(datapoints)) but instead has" + str(np.shape(data_FULL[1])))
-            if np.shape(data_FULL[0][-1]) != (self.parallels, len(self.grid)):
-                raise Exception("ZMT output from " + str(model) + " in CTRL should have shape (len(parallels) ,\
-                 len(grid)) but instead has" + str(np.shape(data_FULL[0][-1])))
+            if np.shape(GMT_out) != (self.num_data, self.parallels):
+                raise Exception("GMT output from " + str(model) + " in CTRL should have shape (len(parallels), ) \
+                 but instead has" + str(np.shape(GMT_out)))
+        if np.shape(ZMT_out) != (self.parallels, len(self.grid)):
+            raise Exception("ZMT output from " + str(model) + " in CTRL should have shape (len(parallels) ,\
+             len(grid)) but instead has" + str(np.shape(ZMT_out)))
 
         # Output data
         if self.mode == 'ZMT':
@@ -314,9 +304,9 @@ class optimization:
                 data_out = ZMT_out
         elif self.mode == 'GMT':
             if self.GMT_response:
-                data_out = np.transpose(data_FULL[1] - np.mean(data_FULL[1][:self.response_average_length], axis=0))
+                data_out = np.transpose(GMT_out - np.mean(GMT_out[:self.response_average_length], axis=0))
             else:
-                data_out = np.transpose(data_FULL[1])
+                data_out = np.transpose(GMT_out)
         elif self.mode == 'Coupled':
             if self.ZMT_response:
                 # dataZMT = np.transpose(np.transpose(data_CTRL[0][-1]) - np.average(data_CTRL[0][-1], weights=np.cos(
@@ -326,12 +316,12 @@ class optimization:
             else:
                 dataZMT = ZMT_out
             if self.GMT_response:
-                dataGMT = np.transpose(data_FULL[1] - np.mean(data_FULL[1][:self.response_average_length], axis=0))
+                dataGMT = np.transpose(GMT_out - np.mean(GMT_out[:self.response_average_length], axis=0))
             else:
-                dataGMT = np.transpose(data_FULL[1])
+                dataGMT = np.transpose(GMT_out)
             data_out = [dataZMT, dataGMT]
         elif self.mode == 'GMT_Single':
-            data_out = data_CTRL[0][-1]
+            data_out = np.average(ZMT_out, weights=np.cos(self.grid * np.pi / 180), axis=1)
 
         return data_out
 
@@ -349,74 +339,74 @@ class optimization:
 class ZOEE_optimization:
     """ZOEE specific implementations to run the optimization"""
 
-    def __init__(self, num_params, labels, levels, elevation, elevation_values, monthly=True):
+    def __init__(self, num_params, labels, levels, elevation, elevation_values, mode, num_data,
+                 monthly=True, progressbar=False):
         self.parallel = True
+
         self.labels = labels
         self.levels = levels
-        self.monthly = monthly
         self.num_params = num_params
         self.elevation = elevation
         self.elevation_values = elevation_values
+        self.mode = mode
+        self.num_data = num_data
 
-    """   def _overwrite_parameters(self, config, P_config):
-        config_out = copy.deepcopy(config)
-        if self.num_params == 1:
-            if self.levels is None:
-                if self.labels[0][:4] == 'func':
-                    config_out['funccomp']['funcparam'][self.labels[0]][self.labels[1]] = P_config
-                if self.labels[0] == 'eqparam':
-                    config_out[self.labels[0]][self.labels[1]] = P_config
-            else:
-                if self.labels[0][:4] == 'func':
-                    config_out['funccomp']['funcparam'][self.labels[0]][self.labels[1]][self.levels] = P_config
-        else:
-            for i in range(self.num_params):
+        self.progressbar = progressbar
+        self.monthly = monthly
 
-                if self.levels[i] is None:
-                    if self.labels[i][0][:4] == 'func':
-                        config_out['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]] = P_config[i]
-                    if self.labels[i][0] == 'eqparam':
-                        config_out[self.labels[i][0]][self.labels[i][1]] = P_config[i]
-                else:
-                    if type(config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]]) == float:
-                        raise Exception('parameter no. ' + str(i) + 'not defined in 1d space')
-                    elif np.shape(config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]]) == (
-                            self.levels[i],):
-                        config_out['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]] = \
-                            np.transpose(np.tile(config['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]],
-                                                 (P_config[i].size, 1)))
-                    if self.labels[i][0][:4] == 'func':
-                        config_out['funccomp']['funcparam'][self.labels[i][0]][self.labels[i][1]][self.levels[i]] = \
-                            P_config[i]
-                    if self.labels[i][0] == 'eqparam':
-                        config_out[self.labels[i][0]][self.labels[i][1]][i] = P_config[i]
-        return config_out
-    """
+        self.parallels = int(num_params * 2 + 1)
 
-    def run(self, config, P_config, ZMT, GMT, control=False):
+    def run(self, config, P_config, ZMT, GMT):
         from .configuration import overwrite_parameters
         from .variables import variable_importer, Vars
         from .rk4 import rk4alg
-        from .functions import cosd
 
         parallel_config = {'number_of_parameters': self.num_params, 'number_of_cycles': 1,
                            'number_of_parallels': int(self.num_params * 2 + 1)}
 
         variable_importer(config, initialZMT=False, parallel=self.parallel, parallel_config=parallel_config,
-                          control=control)
+                          control=True)
         config = overwrite_parameters(config, P_config, self.num_params, self.labels, self.levels)
 
         Vars.T, Vars.T_global = ZMT, GMT
-        data = rk4alg(config, progressbar=False, monthly=self.monthly)
-        if control:
-            if self.elevation:
-                data_out = [data[1], data[2][1:], data[1][-1] + self.elevation_values]
-            else:
-                data_out = [data[1], data[2][1:], data[1][-1]]
+
+        data = rk4alg(config, progressbar=self.progressbar, monthly=self.monthly)
+
+        if self.elevation:
+            ZMT_out = data[1][-1] + self.elevation_values
         else:
-            if self.elevation:
-                data_out = [data[1] + self.elevation_values,
-                            data[2][1:] + np.average(self.elevation_values, weights=cosd(Vars.Lat))]
-            else:
-                data_out = [data[1], data[2][1:]]
+            ZMT_out = data[1][-1]
+
+        ZMT_CTRL = data[1][-1]
+
+        # Check dimension
+        if np.shape(data[2][-1]) != (self.parallels,):
+            raise Exception("GMT output from " + str(self) + " in CTRL should have shape (len(parallels), ) \
+                     but instead has" + str(np.shape(data[2][-1])))
+        if np.shape(ZMT_CTRL) != (self.parallels, len(Vars.Lat)):
+            raise Exception("ZMT output from " + str(self) + " in CTRL should have shape (len(parallels) ,\
+                     len(grid)) but instead has" + str(np.shape(ZMT_CTRL)))
+
+        # Then run full simulation with new parameter set
+        # control = False
+        if self.mode == 'Coupled' or self.mode == 'GMT':
+
+            variable_importer(config, initialZMT=False, parallel=self.parallel, parallel_config=parallel_config,
+                              control=False)
+            config = overwrite_parameters(config, P_config, self.num_params, self.labels, self.levels)
+
+            Vars.T, Vars.T_global = ZMT_CTRL, GMT
+
+            data_FULL = rk4alg(config, progressbar=self.progressbar, monthly=self.monthly)
+            GMT_out = data_FULL[2][1:]
+            if np.shape(GMT_out) != (self.num_data, self.parallels):
+                raise Exception("GMT output from " + str(self) + " in FULL should have shape (len(parallels) ,\
+                         len(datapoints)) but instead has" + str(np.shape(GMT_out)))
+            if np.shape(data_FULL[1][-1]) != (self.parallels, len(Vars.Lat)):
+                raise Exception("ZMT output from " + str(self) + " in CTRL should have shape (len(parallels) ,\
+                         len(grid)) but instead has" + str(np.shape(data_FULL[0][-1])))
+
+            data_out = [ZMT_out, GMT_out]
+        else:
+            data_out = [ZMT_out, 0]
         return data_out
