@@ -62,7 +62,7 @@ optimization_setup_LGM_an = optimization(mode='Coupled',
                                          ZMT_response=True,
                                          GMT_response=True,
                                          response_average_length=30 * 12,
-                                         num_steps=2,
+                                         num_steps=20,
                                          num_data=12000,
                                          gamma0=1e-8,
                                          cost_function_type='LeastSquare',
@@ -83,7 +83,7 @@ optimization_setup_LGM_an.give_parameters(P0, Pmin, Pmax, P_pert_ratio)
 
 """Import the configuration that is required to run your specific model"""
 
-config_HadCM3_LGM = importer('Experiments/HadCM3/Config_HadCM3_LGM.ini')
+config_HadCM3_LGM = importer('Experiments/HadCM3/Config_HadCM3_LGM_fixed.ini')
 parallel_config = {'number_of_parameters': 6, 'number_of_cycles': 1, 'number_of_parallels': 13}
 variable_importer(config_HadCM3_LGM, initialZMT=False, parallel=True, parallel_config=parallel_config)
 config_HadCM3_LGM, Sellers = add_sellersparameters(config_HadCM3_LGM, parameterinterpolatorstepwise,
@@ -96,7 +96,8 @@ parameter_labels = [['eqparam', 'c_ao'], ['func3', 'a'], ['func3', 'b'], ['func4
                     ['func4', 'factor_kwv'], ['func4', 'factor_kair']]
 parameter_levels = np.array([None, None, None, None, None, None])
 elevation = -0.0065 * np.array(Sellers[1][1])
-ZOEE_HadCM3_LGM = ZOEE_optimization(6, parameter_labels, parameter_levels, True, elevation, monthly=True)
+ZOEE_HadCM3_LGM = ZOEE_optimization(6, parameter_labels, parameter_levels, True, elevation, 'Coupled', 12000,
+                                    monthly=True)
 # model_setup=[2,'ZMT',parameter_labels,parameter_levels,elevation,True]
 
 """Execture optimize to start the optimization, giving it your model imported in the step before and configuration
