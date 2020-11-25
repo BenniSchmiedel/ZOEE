@@ -87,7 +87,7 @@ config_HadCM3_LGM = importer('Experiments/HadCM3/Config_HadCM3_LGM_fixed.ini')
 parallel_config = {'number_of_parameters': 6, 'number_of_cycles': 1, 'number_of_parallels': 13}
 variable_importer(config_HadCM3_LGM, initialZMT=False, parallel=True, parallel_config=parallel_config)
 config_HadCM3_LGM, Sellers = add_sellersparameters(config_HadCM3_LGM, parameterinterpolatorstepwise,
-                                                   'ZOEE/config/SellersParameterization.ini', 4, 2, True, True)
+                                                   'ZOEE/config/SellersParameterization.ini', 4, 2, True, False)
 
 """Import the class of your model that has to be defined in ZOEE.modules.optimization. And give it whatever 
 configuration it requires"""
