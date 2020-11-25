@@ -327,7 +327,11 @@ class albedo:
 
         :rtype:                     float (0D)      
         """
-        return alpha
+        if Base.parallelization == True:
+            alpha = np.tile(alpha, (Base.number_of_parallels, 1))
+            return alpha
+        else:
+            return alpha
 
     def static_bud(self, alpha_p, border_1, border_2):
         """
