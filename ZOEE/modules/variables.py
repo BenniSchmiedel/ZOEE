@@ -387,9 +387,7 @@ def datareset():
     Vars.Lat2 = classreset.Lat2
 
 
-def variable_importer(config, initialZMT=True, control=False, parallel=False, parallel_config=0, accuracy=1e-3,
-                      accuracy_number=1000):
-    from .variables import Vars
+def variable_importer(config, initialZMT=True, control=False, parallel=False, parallel_config=0):
     """ 
     Executes all relevant functions to import variables for a single simulation run. From the *configuration* dictionary, returned by ``configuration.importer``, the relevant information is extracted and the specific importer functions are executed in the following order:
 
@@ -408,14 +406,13 @@ def variable_importer(config, initialZMT=True, control=False, parallel=False, pa
     :returns:                   No return
 
     """
-    base_importer(config['rk4input'], control=control, parallel=parallel, parallel_config=parallel_config,
-                  accuracy=accuracy, accuracy_number=accuracy_number)
+    base_importer(config['rk4input'], control=control, parallel=parallel, parallel_config=parallel_config)
     trackerreset()
     initial_importer(config['initials'], initialZMT=initialZMT)
     output_importer(config['funccomp']['funclist'])
 
 
-def base_importer(rk4input, control=False, parallel=False, parallel_config=None, accuracy=1e-3, accuracy_number=1000):
+def base_importer(rk4input, control=False, parallel=False, parallel_config=None):
     """
     Adds the most relevant variables to the ``Base`` Class. This enables calling and writing variables globally and across different files.
 
@@ -490,12 +487,12 @@ def base_importer(rk4input, control=False, parallel=False, parallel_config=None,
     if control == True:
         Base.control = True
         Base.eq_condition = True
-        Base.number_of_integration = 100000
+        Base.number_of_integration = 500 * 365
         Base.data_readout = 1
-        Base.eq_condition_length = accuracy_number
-        Base.eq_condition_amplitude = accuracy
-        print('Starting controlrun with a temperature accuracy of %s K on the GMT over %s datapoints.' % (
-            accuracy, accuracy_number))
+        Base.eq_condition_length = rk4input['eq_condition_length']
+        Base.eq_condition_amplitude = rk4input['eq_condition_amplitude']
+        print('Starting controlrun with %s datapoints and equilibrium condition of std(GMT[-%s years]) < %s ' % (
+            Base.number_of_integration, Base.eq_condition_length, Base.eq_condition_amplitude))
     else:
         Base.control = False
 

@@ -400,8 +400,8 @@ class ZOEE_optimization:
             data_FULL = rk4alg(config, progressbar=self.progressbar, monthly=self.monthly)
             GMT_out = data_FULL[2][1:]
             if np.shape(GMT_out) != (self.num_data, self.parallels):
-                raise Exception("GMT output from " + str(self) + " in FULL should have shape (len(parallels) ,\
-                         len(datapoints)) but instead has" + str(np.shape(GMT_out)))
+                raise Exception("GMT output from " + str(self) + " in FULL should have shape (len(datapoints) ,\
+                         len(parallels)) but instead has" + str(np.shape(GMT_out)))
             if np.shape(data_FULL[1][-1]) != (self.parallels, len(Vars.Lat)):
                 raise Exception("ZMT output from " + str(self) + " in CTRL should have shape (len(parallels) ,\
                          len(grid)) but instead has" + str(np.shape(data_FULL[0][-1])))

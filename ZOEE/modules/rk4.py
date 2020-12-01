@@ -185,6 +185,13 @@ def rk4alg(config, progressbar=True, monthly=False):
     data[0][0] = Vars.t  # time t
     data[1][0] = Vars.T  # Temperature T
     data[2][0] = Vars.T_global  # Global mean temperature T_global
+
+    if monthly:
+        Base.eq_length = 12 * Base.eq_condition_length
+    else:
+        Base.eq_length = int((Base.eq_condition_length * 60 * 60 * 24) / Base.stepsize_of_integration)
+
+    print(Base.eq_length)
     ###Running runge Kutta 4th order n times###
     j = 0
     if progressbar:
@@ -209,7 +216,7 @@ def rk4alg(config, progressbar=True, monthly=False):
 
         # filling output array "data" with values from the generated increments
         # For the time simply adding the integration stepsize
-        Vars.t = Vars.t + h
+        Vars.t += h
         Vars.T = T0 + (k1 + k2 + k2 + k3 + k3 + k4) / 6
         if Base.spatial_resolution > 0:
             Vars.T_global = earthsystem().globalmean_temperature()
@@ -236,9 +243,11 @@ def rk4alg(config, progressbar=True, monthly=False):
         # Check if the equilibrium condition is fulfilled. If true, break the loop, cut the output array to
         # the current length and move on to return the output data
         if Base.eq_condition:
-            if (Base.Runtime_Tracker + 4) % (4 * Base.eq_condition_length + 4) == 0:
+
+            if (Base.Runtime_Tracker + 4) % (4 * Base.eq_length + 4) == 0:
+
                 if Base.parallelization:
-                    if all(SteadyStateConditionGlobal(data[2][(j - Base.eq_condition_length):j, k]) for k in
+                    if all(SteadyStateConditionGlobal(data[2][(j - Base.eq_length):j, k]) for k in
                            range(Base.number_of_parallels)):
                         for l in range(len(data)):
                             data[l] = data[l][:(j + 1)]
@@ -246,21 +255,20 @@ def rk4alg(config, progressbar=True, monthly=False):
                             if type(Vars.Read[m]) == np.ndarray:
                                 Vars.Read[m] = Vars.Read[m][:(j)]
                         print('Eq. State reached after %s steps, within %s seconds' % (
-                        int(Base.Runtime_Tracker / 4), (time.time() - Vars.start_time)))
+                            int(Base.Runtime_Tracker / 4), (time.time() - Vars.start_time)))
                         break
                 else:
-                    if SteadyStateConditionGlobal(data[2][(j - Base.eq_condition_length):j]) == True:
+                    if SteadyStateConditionGlobal(data[2][(j - Base.eq_length):j]):
                         for l in range(len(data)):
                             data[l] = data[l][:(j + 1)]
                         for m in Vars.Read.keys():
                             if type(Vars.Read[m]) == np.ndarray:
                                 Vars.Read[m] = Vars.Read[m][:(j)]
                         print('Eq. State reached after %s steps, within %s seconds' % (
-                        int(Base.Runtime_Tracker / 4), (time.time() - Vars.start_time)))
+                            int(Base.Runtime_Tracker / 4), (time.time() - Vars.start_time)))
                         break
             elif Base.Runtime_Tracker == (Base.number_of_integration) * 4:
-                print('Transit State reached after %s steps within %s seconds' % (
-                int(Base.Runtime_Tracker / 4), time.time() - Vars.start_time))
+                print('Control still in transit state!')
                 break
     # Return the written data (Cut excessive 0s)
     dataout = [np.array(data[0][:(j + 1)]), np.array(data[1][:(j + 1)]), np.array(data[2][:(j + 1)])]
