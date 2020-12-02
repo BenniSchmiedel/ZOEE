@@ -187,11 +187,10 @@ def rk4alg(config, progressbar=True, monthly=False):
     data[2][0] = Vars.T_global  # Global mean temperature T_global
 
     if monthly:
-        Base.eq_length = 12 * Base.eq_condition_length
+        Base.eq_length = int(12 * Base.eq_condition_length)
     else:
         Base.eq_length = int((Base.eq_condition_length * 60 * 60 * 24) / Base.stepsize_of_integration)
 
-    print(Base.eq_length)
     ###Running runge Kutta 4th order n times###
     j = 0
     if progressbar:

@@ -3,7 +3,7 @@
 
 # # Optimizations of ZOEE to HadCM3, CESM, Pages2k - p1000
 
-# In[2]:
+# In[1]:
 
 
 import matplotlib.pyplot as plt
@@ -110,8 +110,7 @@ F_HadCM3_LGM_an, dF_HadCM3_LGM_an, P_HadCM3_LGM_an, Ptrans_HadCM3_LGM_an, gamma_
 # In[ ]:
 
 
-np.savetxt('Experiments/Output/HadCM3_LGM_P_20_resp_an.txt', [P_HadCM3_LGM_an[-1], np.tile(gamma_HadCM3_LGM_an[-1], 6)],
-           delimiter=',')
+np.savetxt('Experiments/Output/HadCM3_LGM_P_20_resp_an.txt', P_HadCM3_LGM_an, delimiter=',')
 np.savetxt('Experiments/Output/HadCM3_LGM_F_20_resp_an.txt', F_HadCM3_LGM_an, delimiter=',')
 np.savetxt('Experiments/Output/HadCM3_LGM_dF_20_resp_an.txt', dF_HadCM3_LGM_an, delimiter=',')
 np.savetxt('Experiments/Output/HadCM3_LGM_ZMT_20_resp_an.txt', data_HadCM3_LGM_an[0][:, 0], delimiter=',')
@@ -158,8 +157,7 @@ F_HadCM3_LGM, dF_HadCM3_LGM, P_HadCM3_LGM, Ptrans_HadCM3_LGM, gamma_HadCM3_LGM, 
 # In[ ]:
 
 
-np.savetxt('Experiments/Output/HadCM3_LGM_P_20_abs.txt', [P_HadCM3_LGM[-1], np.tile(gamma_HadCM3_LGM[-1], 6)],
-           delimiter=',')
+np.savetxt('Experiments/Output/HadCM3_LGM_P_20_abs.txt', P_HadCM3_LGM, delimiter=',')
 np.savetxt('Experiments/Output/HadCM3_LGM_F_20_abs.txt', F_HadCM3_LGM, delimiter=',')
 np.savetxt('Experiments/Output/HadCM3_LGM_dF_20_abs.txt', dF_HadCM3_LGM, delimiter=',')
 np.savetxt('Experiments/Output/HadCM3_LGM_ZMT_20_abs.txt', data_HadCM3_LGM[0][:, 0], delimiter=',')
