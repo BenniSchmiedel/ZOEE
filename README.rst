@@ -22,7 +22,7 @@ A detailed documentation for ``ZOEE`` is hosted on `Read-the-docs <https://loweb
 Installation
 ------------
 
-|PyPI|
+|PyPi|
 
 The simplest way to install ``ZOEE`` is from PyPi.
 To download and install ``ZOEE`` via ``pip`` you can use::
