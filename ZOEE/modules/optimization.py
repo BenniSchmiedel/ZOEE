@@ -33,7 +33,7 @@ class optimization:
                  num_steps=10, num_data=None,
                  gamma0=1e-8,
                  cost_function_type='LeastSquare', cost_weight='mean', cost_ratio=0.5, ZMT=0, GMT=0,
-                 precision=0, grid=None):
+                 precision=0):
 
         self.num_steps = num_steps  # How many optimization steps
         self.mode = mode  # Optimization type
@@ -46,7 +46,6 @@ class optimization:
         self.GMT_initial = GMT  # Initial GMT
         self.precision = precision  # Precision to which is optimized, then stopped.
         self.cost_function_type = cost_function_type  # Cost function type (least squares)
-        self.grid = grid  # Grid (1D latitude resolution)
         self.ZMT_response = ZMT_response  # GMT response/anomaly or not
         self.GMT_response = GMT_response  # GMT response/anomaly or not
         self.response_average_length = response_average_length  # Number of Datapoints to be averaged to response
@@ -91,7 +90,6 @@ class optimization:
         The script executing the respective model and its specific configuration is inbound in the interface
         .run_model(model, model_config) and has to be provided in order to correctly run the procedure.
         """
-        from tqdm import tnrange
 
         self._test_for_parameters()
 
@@ -148,12 +146,6 @@ class optimization:
             # Calculate the gradient of the costfunction
             dS[i] = self._get_gradient(S[i])
 
-            # Calculate the gamma-factor (learning rate)
-            if i == 0:
-                gamma[i] = self.gamma0
-            else:
-                gamma[i] = self._get_stepsize(dS[i - 1], dS[i], Ptrans[i - 1], Ptrans[i])
-
             # Check if a certain precision is reached, if so, break the loop and return optimization data.
             if self._precision_check(dS[0], dS[i]):
                 print('stop', i)
@@ -163,6 +155,12 @@ class optimization:
                 dS = dS[:i]
                 gamma = gamma[:i]
                 break
+
+            # Calculate the gamma-factor (learning rate)
+            if i == 0:
+                gamma[i] = self.gamma0
+            else:
+                gamma[i] = self._get_stepsize(dS[i - 1], dS[i], Ptrans[i - 1], Ptrans[i])
 
             # Calculate new parameters from gamma and costfunction gradient dF
             Ptrans_next = self._new_parameters(Ptrans[i], gamma[i], dS[i])
@@ -230,8 +228,8 @@ class optimization:
         return dS
 
     def _get_stepsize(self, dS0, dS1, P0, P1):
-        gamma = np.abs(np.dot(P1 - P0, dS1 - dS0) / np.dot(np.abs(dS1 - dS0), np.abs(dS1 - dS0)))
-        return gamma
+
+        return np.abs(np.dot(P1 - P0, dS1 - dS0) / np.dot(np.abs(dS1 - dS0), np.abs(dS1 - dS0)))
 
     def _precision_check(self, dS0, dS):
         dSabs = np.sqrt(np.dot(dS, dS))
