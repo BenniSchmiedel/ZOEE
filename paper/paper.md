@@ -6,11 +6,13 @@ tags:
   - EBM
 authors:
   - name: Benjamin Schmiedel
-    orcid: 0000-0002-8858-2783
-    affiliation: 1
+    orcid: 0000-0003-2411-3176
+    affiliation: "1, 2"
 affiliations:
  - name: Institute of environmental physics, University of Heidelberg, Germany
    index: 1
+ - name: University of Gothenburg, Germany
+   index: 2
 date: 16 December 2020
 bibliography: paper.bib
 ---

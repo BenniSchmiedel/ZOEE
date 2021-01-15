@@ -4,7 +4,7 @@
 ZOEE is an python implementation of Zero to One dimensional Earth Energy balance models.
 
 It serves as a framework to compile and simulate energy balance models from a collection of parameterizations,
-which describe the energy transport of reduced/simplified earth system.
+which describe simplified energy fluxes of the earth system.
 
 Applications
 ------------
@@ -28,6 +28,7 @@ The simplest way to install ``ZOEE`` is from PyPi.
 To download and install ``ZOEE`` via ``pip`` you can use::
 
     pip install ZOEE
+
 Alternatively, you can clone the git repository of the source code with::
 
     git clone https://github.com/BenniSchmiedel/ZOEE.git

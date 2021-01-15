@@ -53,7 +53,7 @@ optimization_setup = optimization(mode='Coupled',
 the parameter pertubation to estimate the cost function gradient"""
 P0 = np.array([70 * 4.2e6, 200, 1.9, 1.165, 1.165, 1.165])
 # P0=Get_PGamma[0]
-Pmin = np.array([1 * 4.2e6, 170, 1.3, 0.9, 0.9, 0.9])
+Pmin = np.array([1 * 4.2e6, 170, 1.3, 0.8, 0.8, 0.8])
 Pmax = np.array([100 * 4.2e6, 240, 2.5, 1.3, 1.3, 1.3])
 P_pert_ratio = 1 / 10000
 optimization_setup.give_parameters(P0, Pmin, Pmax, P_pert_ratio)
