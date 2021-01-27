@@ -33,7 +33,7 @@ class optimization:
                  num_steps=10, num_data=None,
                  gamma0=1e-8,
                  cost_function_type='LeastSquare', cost_weight='mean', cost_ratio=0.5, ZMT=0, GMT=0,
-                 precision=0):
+                 precision=0, grid=0):
 
         self.num_steps = num_steps  # How many optimization steps
         self.mode = mode  # Optimization type
@@ -49,7 +49,7 @@ class optimization:
         self.ZMT_response = ZMT_response  # GMT response/anomaly or not
         self.GMT_response = GMT_response  # GMT response/anomaly or not
         self.response_average_length = response_average_length  # Number of Datapoints to be averaged to response
-
+        self.grid = grid
         self.current_step = 0
 
     def _test_for_parameters(self):
