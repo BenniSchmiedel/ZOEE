@@ -3,7 +3,7 @@
 
 # # Optimizations of ZOEE to HadCM3 Data
 
-# In[ ]:
+# In[1]:
 
 
 import matplotlib.pyplot as plt
@@ -23,7 +23,7 @@ import pandas as pd
 
 # ## Target Data
 
-# In[ ]:
+# In[2]:
 
 
 HadCM3_ZMT = pd.read_csv('Experiments/HadCM3/HadCM3_ZMT_10deg.csv')
@@ -31,12 +31,12 @@ HadCM3_ZMT_anomaly = pd.read_csv('Experiments/HadCM3/HadCM3_ZMT_10deg.csv')
 HadCM3_GMT = pd.read_csv('Experiments/HadCM3/HadCM3_850.csv')
 HadCM3_GMT_anomaly = pd.read_csv('Experiments/HadCM3/HadCM3_850_anomaly.csv')
 
-# In[ ]:
+# In[3]:
 
 
 HadCM3_ZMT.columns
 
-# In[ ]:
+# In[4]:
 
 
 Config_data = {'xnagd': 'Config_HadCM3_fixed.ini', 'xnagf': 'Config_HadCM3_fixed.ini',
@@ -49,7 +49,7 @@ Config_data = {'xnagd': 'Config_HadCM3_fixed.ini', 'xnagf': 'Config_HadCM3_fixed
 
 # ## General optimization setup
 
-# In[ ]:
+# In[5]:
 
 
 P0 = np.array([70 * 4.2e6, 200, 1.9, 1, 1, 1])
@@ -62,7 +62,7 @@ parameter_labels = [['eqparam', 'c_ao'], ['func3', 'a'], ['func3', 'b'], ['func4
                     ['func4', 'factor_kwv'], ['func4', 'factor_kair']]
 parameter_levels = np.array([None, None, None, None, None, None])
 
-# In[ ]:
+# In[6]:
 
 
 """Decleration of optimization configuration"""
@@ -158,10 +158,11 @@ optimization_setup_LGM.give_parameters(P0, Pmin, Pmax, P_pert_ratio)
 
 # ### ZMT absolute, GMT anomaly
 
-# In[ ]:
+# In[8]:
 
 
-for run in ['xnagd', 'xnagf', 'xnagg', 'pi_forc']:
+for run in ['xnagd']:  # , 'xnagf', 'xnagg','pi_forc']:
+
     """Import the configuration that is required to run your specific model"""
 
     config_HadCM3 = importer('Experiments/HadCM3/' + Config_data[run])
@@ -184,18 +185,19 @@ for run in ['xnagd', 'xnagf', 'xnagg', 'pi_forc']:
     optimization_setup.num_data = 12000
     # optimization_setup.response=False
     print("Optimization >>> {}".format(run))
-    F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, ZMT_HadCM3, GMT_HadCM3 = optimization_setup.optimize(
-        ZOEE_HadCM3, config_HadCM3)
+    F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3 = optimization_setup.optimize(ZOEE_HadCM3,
+                                                                                                          config_HadCM3)
 
     df = pd.DataFrame()
-    df['F'] = F_HadCM3
-    df['dF'] = dF_HadCM3
-    df['P'] = P_HadCM3
-    df['Ptrans'] = Ptrans_HadCM3
-    df['Gamma'] = gamma_HadCM3
-    df['ZMT'] = ZMT_HadCM3
-    df['GMT'] = GMT_HadCM3
+    df['F'] = pd.Series(F_HadCM3.tolist())
+    df['dF'] = pd.Series(dF_HadCM3.tolist())
+    df['P'] = pd.Series(P_HadCM3.tolist())
+    df['Ptrans'] = pd.Series(Ptrans_HadCM3.tolist())
+    df['Gamma'] = pd.Series(gamma_HadCM3.tolist())
+    df['ZMT'] = pd.Series(Data_HadCM3[0][:, 0].tolist())
+    df['GMT'] = pd.Series(Data_HadCM3[1][:, 0].tolist())
     df.to_csv('Experiments/Output/' + run + '_20abs.csv')
+
 
 # ### ZMT anomaly, GMT anomaly
 
@@ -225,18 +227,19 @@ for run in ['xnagd', 'xnagf', 'xnagg', 'pi_forc']:
     optimization_setup.num_data = 12000
     # optimization_setup.response=False
     print("Optimization >>> {}".format(run))
-    F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, ZMT_HadCM3, GMT_HadCM3 = optimization_setup_an.optimize(
+    F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3 = optimization_setup_an.optimize(
         ZOEE_HadCM3, config_HadCM3)
 
     df = pd.DataFrame()
-    df['F'] = F_HadCM3
-    df['dF'] = dF_HadCM3
-    df['P'] = P_HadCM3
-    df['Ptrans'] = Ptrans_HadCM3
-    df['Gamma'] = gamma_HadCM3
-    df['ZMT'] = ZMT_HadCM3
-    df['GMT'] = GMT_HadCM3
+    df['F'] = pd.Series(F_HadCM3.tolist())
+    df['dF'] = pd.Series(dF_HadCM3.tolist())
+    df['P'] = pd.Series(P_HadCM3.tolist())
+    df['Ptrans'] = pd.Series(Ptrans_HadCM3.tolist())
+    df['Gamma'] = pd.Series(gamma_HadCM3.tolist())
+    df['ZMT'] = pd.Series(Data_HadCM3[0][:, 0].tolist())
+    df['GMT'] = pd.Series(Data_HadCM3[1][:, 0].tolist())
     df.to_csv('Experiments/Output/' + run + '_20an.csv')
+
 
 # ## LGM runs
 
@@ -268,18 +271,19 @@ for run in ['xmzke', 'xmzkg', 'xmzkh', 'LGM_forc', 'xmzkb', 'xmzkc']:
     optimization_setup_LGM.num_data = 12000
     # optimization_setup.response=False
     print("Optimization >>> {}".format(run))
-    F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, ZMT_HadCM3, GMT_HadCM3 = optimization_setup_LGM.optimize(
+    F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3 = optimization_setup_LGM.optimize(
         ZOEE_HadCM3, config_HadCM3)
 
     df = pd.DataFrame()
-    df['F'] = F_HadCM3
-    df['dF'] = dF_HadCM3
-    df['P'] = P_HadCM3
-    df['Ptrans'] = Ptrans_HadCM3
-    df['Gamma'] = gamma_HadCM3
-    df['ZMT'] = ZMT_HadCM3
-    df['GMT'] = GMT_HadCM3
+    df['F'] = pd.Series(F_HadCM3.tolist())
+    df['dF'] = pd.Series(dF_HadCM3.tolist())
+    df['P'] = pd.Series(P_HadCM3.tolist())
+    df['Ptrans'] = pd.Series(Ptrans_HadCM3.tolist())
+    df['Gamma'] = pd.Series(gamma_HadCM3.tolist())
+    df['ZMT'] = pd.Series(Data_HadCM3[0][:, 0].tolist())
+    df['GMT'] = pd.Series(Data_HadCM3[1][:, 0].tolist())
     df.to_csv('Experiments/Output/' + run + '_20abs.csv')
+
 
 # ### LGM - ZMT anomaly, GMT anomaly -  4x 185ppm, 1x 150ppm, 1x 210ppm
 
@@ -309,15 +313,15 @@ for run in ['xmzke', 'xmzkg', 'xmzkh', 'LGM_forc', 'xmzkb', 'xmzkc']:
     optimization_setup_LGM_an.num_data = 12000
     # optimization_setup.response=False
     print("Optimization >>> {}".format(run))
-    F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, ZMT_HadCM3, GMT_HadCM3 = optimization_setup_LGM_an.optimize(
+    F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3 = optimization_setup_LGM_an.optimize(
         ZOEE_HadCM3, config_HadCM3)
 
     df = pd.DataFrame()
-    df['F'] = F_HadCM3
-    df['dF'] = dF_HadCM3
-    df['P'] = P_HadCM3
-    df['Ptrans'] = Ptrans_HadCM3
-    df['Gamma'] = gamma_HadCM3
-    df['ZMT'] = ZMT_HadCM3
-    df['GMT'] = GMT_HadCM3
+    df['F'] = pd.Series(F_HadCM3.tolist())
+    df['dF'] = pd.Series(dF_HadCM3.tolist())
+    df['P'] = pd.Series(P_HadCM3.tolist())
+    df['Ptrans'] = pd.Series(Ptrans_HadCM3.tolist())
+    df['Gamma'] = pd.Series(gamma_HadCM3.tolist())
+    df['ZMT'] = pd.Series(Data_HadCM3[0][:, 0].tolist())
+    df['GMT'] = pd.Series(Data_HadCM3[1][:, 0].tolist())
     df.to_csv('Experiments/Output/' + run + '_20an.csv')
