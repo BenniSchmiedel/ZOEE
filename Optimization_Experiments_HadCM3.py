@@ -161,8 +161,7 @@ optimization_setup_LGM.give_parameters(P0, Pmin, Pmax, P_pert_ratio)
 # In[8]:
 
 
-for run in ['xnagd']:  # , 'xnagf', 'xnagg','pi_forc']:
-
+for run in ['xnagd', 'xnagf', 'xnagg', 'pi_forc']:
     """Import the configuration that is required to run your specific model"""
 
     config_HadCM3 = importer('Experiments/HadCM3/' + Config_data[run])
@@ -223,8 +222,8 @@ for run in ['xnagd', 'xnagf', 'xnagg', 'pi_forc']:
 
     """Execture optimize to start the optimization, giving it your model imported in the step before and configuration
     required to run your model"""
-    optimization_setup.target = {'ZMT': HadCM3_ZMT_anomaly[run], 'GMT': HadCM3_GMT_anomaly[run]}
-    optimization_setup.num_data = 12000
+    optimization_setup_an.target = {'ZMT': HadCM3_ZMT_anomaly[run], 'GMT': HadCM3_GMT_anomaly[run]}
+    optimization_setup_an.num_data = 12000
     # optimization_setup.response=False
     print("Optimization >>> {}".format(run))
     F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3 = optimization_setup_an.optimize(
