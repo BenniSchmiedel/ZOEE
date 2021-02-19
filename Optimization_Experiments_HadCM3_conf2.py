@@ -187,6 +187,10 @@ df.to_csv('Experiments/Output/'+run+'_conf1_abs.csv')
 for run in ['LGM_forc','xmzkb','xmzkc']: 
 
     config_HadCM3=importer('Experiments/HadCM3/'+Config_data[run])
+    config_HadCM3['funccomp']['funcparam']['func3']['a']=df['P'].iloc[-1][1]
+    config_HadCM3['funccomp']['funcparam']['func3']['b']=df['P'].iloc[-1][2]
+    config_HadCM3['eqparam']['c_ao']=df['P'].iloc[-1][0]
+    
     parallel_config = {'number_of_parameters': 3, 'number_of_cycles': 1,'number_of_parallels': 7}
     variable_importer(config_HadCM3,initialZMT=False,parallel=True,parallel_config=parallel_config)
     config_HadCM3,Sellers=add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,                                                'ZOEE/config/SellersParameterization.ini',4,2,True,False)
@@ -259,6 +263,10 @@ df.to_csv('Experiments/Output/'+run+'_conf1_an.csv')
 for run in ['LGM_forc','xmzkb','xmzkc']: 
 
     config_HadCM3=importer('Experiments/HadCM3/'+Config_data[run])
+    config_HadCM3['funccomp']['funcparam']['func3']['a']=df['P'].iloc[-1][1]
+    config_HadCM3['funccomp']['funcparam']['func3']['b']=df['P'].iloc[-1][2]
+    config_HadCM3['eqparam']['c_ao']=df['P'].iloc[-1][0]
+    
     parallel_config = {'number_of_parameters': 3, 'number_of_cycles': 1,'number_of_parallels': 7}
     variable_importer(config_HadCM3,initialZMT=False,parallel=True,parallel_config=parallel_config)
     config_HadCM3,Sellers=add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,                                                'ZOEE/config/SellersParameterization.ini',4,2,True,False)
@@ -331,6 +339,10 @@ df.to_csv('Experiments/Output/'+run+'_conf2_abs.csv')
 for run in ['xmzkb','xmzkc']: 
 
     config_HadCM3=importer('Experiments/HadCM3/'+Config_data[run])
+    config_HadCM3['funccomp']['funcparam']['func3']['a']=df['P'].iloc[-1][1]
+    config_HadCM3['funccomp']['funcparam']['func3']['b']=df['P'].iloc[-1][2]
+    config_HadCM3['eqparam']['c_ao']=df['P'].iloc[-1][0]
+    
     parallel_config = {'number_of_parameters': 3, 'number_of_cycles': 1,'number_of_parallels': 7}
     variable_importer(config_HadCM3,initialZMT=False,parallel=True,parallel_config=parallel_config)
     config_HadCM3,Sellers=add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,                                                'ZOEE/config/SellersParameterization.ini',4,2,True,False)
@@ -401,6 +413,10 @@ df.to_csv('Experiments/Output/'+run+'_conf2_an.csv')
 for run in ['xmzkb','xmzkc']: 
 
     config_HadCM3=importer('Experiments/HadCM3/'+Config_data[run])
+    config_HadCM3['funccomp']['funcparam']['func3']['a']=df['P'].iloc[-1][1]
+    config_HadCM3['funccomp']['funcparam']['func3']['b']=df['P'].iloc[-1][2]
+    config_HadCM3['eqparam']['c_ao']=df['P'].iloc[-1][0]
+    
     parallel_config = {'number_of_parameters': 3, 'number_of_cycles': 1,'number_of_parallels': 7}
     variable_importer(config_HadCM3,initialZMT=False,parallel=True,parallel_config=parallel_config)
     config_HadCM3,Sellers=add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,                                                'ZOEE/config/SellersParameterization.ini',4,2,True,False)
