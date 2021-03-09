@@ -15,14 +15,13 @@
 #     - In the next step the model is optimized to altered LGM runs with only f_wv,f_sh,f_oc
 #         - xmzkb, xmzkc
 
-# In[5]:
+# In[14]:
 
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ZOEE.modules.configuration import importer, add_sellersparameters, parameterinterpolatorstepwise, \
-    overwrite_parameters
+from ZOEE.modules.configuration import importer, add_sellersparameters, parameterinterpolatorstepwise, overwrite_parameters
 from ZOEE.modules.variables import variable_importer, Vars, Base
 from ZOEE.modules.optimization import optimization, ZOEE_optimization
 #from ZOEE import update_plotstyle, moving_average
@@ -35,7 +34,7 @@ import pandas as pd
 
 # ## Target Data
 
-# In[6]:
+# In[15]:
 
 
 HadCM3_ZMT=pd.read_csv('Experiments/HadCM3/HadCM3_ZMT_10deg.csv')
@@ -43,7 +42,8 @@ HadCM3_ZMT_anomaly=pd.read_csv('Experiments/HadCM3/HadCM3_ZMT_anomaly_10deg.csv'
 HadCM3_GMT=pd.read_csv('Experiments/HadCM3/HadCM3_850.csv')
 HadCM3_GMT_anomaly=pd.read_csv('Experiments/HadCM3/HadCM3_850_anomaly.csv')
 
-# In[7]:
+
+# In[16]:
 
 
 Config_data={'xnagd':'Config_HadCM3_fixed.ini', 'xnagf':'Config_HadCM3_fixed.ini', 'xnagg':'Config_HadCM3_fixed.ini',
@@ -55,40 +55,41 @@ Config_data={'xnagd':'Config_HadCM3_fixed.ini', 'xnagf':'Config_HadCM3_fixed.ini
 
 # ## General optimization setup
 
-# In[8]:
+# In[20]:
 
 
 P0_6=np.array([70*4.2e6,200,1.9,1,1,1])
 #P0=Get_PGamma[0]
-Pmin_6=np.array([1*4.2e6,170,1.3,0.8,0.8,0.8])
-Pmax_6=np.array([100*4.2e6,240,2.5,1.2,1.2,1.2])
+Pmin_6=np.array([1*4.2e6,170,1.3,0.7,0.7,0.7])
+Pmax_6=np.array([100*4.2e6,240,2.5,1.3,1.3,1.3])
 P_pert_ratio_6=1/10000
 
 parameter_labels_6=[['eqparam','c_ao'],['func3','a'],['func3','b'],['func4','factor_oc'],['func4','factor_kwv'],['func4','factor_kair']]
 parameter_levels_6=np.array([None,None,None,None,None,None])
 
 P0_3=np.array([1,1,1])
-# P0=Get_PGamma[0]
-Pmin_3 = np.array([0.8, 0.8, 0.8])
-Pmax_3 = np.array([1.2, 1.2, 1.2])
-P_pert_ratio_3 = 1 / 10000
+#P0=Get_PGamma[0]
+Pmin_3=np.array([0.7,0.7,0.7])
+Pmax_3=np.array([1.3,1.3,1.3])
+P_pert_ratio_3=1/10000
 
-parameter_labels_3 = [['func4', 'factor_oc'], ['func4', 'factor_kwv'], ['func4', 'factor_kair']]
-parameter_levels_3 = np.array([None, None, None])
+parameter_labels_3=[['func4','factor_oc'],['func4','factor_kwv'],['func4','factor_kair']]
+parameter_levels_3=np.array([None,None,None])
 
 runtime = 6000
 
-# In[9]:
+
+# In[21]:
 
 
-kwargs = {'mode': 'Coupled',
-          'target': None,
-          'ZMT_response': False,
-          'GMT_response': True,
-          'response_average_length': 30 * 12,
-          'num_steps': 20,
-          'num_data': 12000,
-          'gamma0': 1e-8,
+kwargs={'mode':'Coupled',
+        'target':None,
+        'ZMT_response':False, 
+        'GMT_response':True,
+        'response_average_length':30*12,
+        'num_steps':20,
+        'num_data':runtime,
+        'gamma0':1e-8,
         'cost_function_type':'LeastSquare',
         'cost_weight':'cross_weight',
         'cost_ratio':None,
@@ -107,7 +108,8 @@ kwargs_LGM['GMT']=283.15
 kwargs_LGM_an = kwargs_LGM.copy()
 kwargs_LGM_an['ZMT_response']=True
 
-# In[10]:
+
+# In[22]:
 
 
 """Decleration of optimization configuration"""
@@ -122,12 +124,6 @@ optimization_setup_3_LGM.give_parameters(P0_3,Pmin_3,Pmax_3,P_pert_ratio_3)
 
 optimization_setup_3_LGM_an = optimization(**kwargs_LGM_an)
 optimization_setup_3_LGM_an.give_parameters(P0_3,Pmin_3,Pmax_3,P_pert_ratio_3)
-
-#optimization_setup_2 = optimization(**kwargs)
-#optimization_setup_2.give_parameters(P0_1,Pmin_1,Pmax_1,P_pert_ratio_1)
-
-#optimization_setup_2_an = optimization(**kwargs_an)
-#optimization_setup_2_an.give_parameters(P0_1,Pmin_1,Pmax_1,P_pert_ratio_1)
 
 optimization_setup_6_LGM = optimization(**kwargs_LGM)
 optimization_setup_6_LGM.give_parameters(P0_6,Pmin_6,Pmax_6,P_pert_ratio_6)
@@ -151,24 +147,22 @@ config_HadCM3=importer('Experiments/HadCM3/'+Config_data[run])
 parallel_config = {'number_of_parameters': 6, 'number_of_cycles': 1,'number_of_parallels': 13}
 variable_importer(config_HadCM3,initialZMT=False,parallel=True,parallel_config=parallel_config)
 config_HadCM3,Sellers=add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,                                            'ZOEE/config/SellersParameterization.ini',4,2,True,False)
-elevation = -0.0065 * np.array(Sellers[1][1])
+elevation=-0.0065*np.array(Sellers[1][1])
 
 """Import the class of your model that has to be defined in ZOEE.modules.optimization. And give it whatever 
 configuration it requires"""
-ZOEE_HadCM3 = ZOEE_optimization(6, parameter_labels_6, parameter_levels_6, True, elevation, 'Coupled', runtime,
-                                monthly=True)
+ZOEE_HadCM3 = ZOEE_optimization(6,parameter_labels_6,parameter_levels_6,True,elevation,'Coupled',runtime,monthly=True)
 
-# model_setup=[2,'ZMT',parameter_labels,parameter_levels,elevation,True]
+#model_setup=[2,'ZMT',parameter_labels,parameter_levels,elevation,True]
 
 """Execture optimize to start the optimization, giving it your model imported in the step before and configuration
 required to run your model"""
-optimization_setup_6.target = {'ZMT': HadCM3_ZMT[run], 'GMT': HadCM3_GMT_anomaly[run][:runtime]}
+optimization_setup_6.target={'ZMT':HadCM3_ZMT[run],'GMT':HadCM3_GMT_anomaly[run][:runtime]}
 
-config_HadCM3['rk4input']['number_of_integration'] = int(runtime / 12000 * 365 * 1000)
+config_HadCM3['rk4input']['number_of_integration']=int(runtime/12000 * 365*1000)
 
 print("Optimization >>> {}".format(run))
-F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3 = optimization_setup_6.optimize(ZOEE_HadCM3,
-                                                                                                        config_HadCM3)
+F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3=optimization_setup_6.optimize(ZOEE_HadCM3,config_HadCM3)
 
 df = pd.DataFrame()
 df['F'] = pd.Series(F_HadCM3.tolist())
@@ -176,41 +170,48 @@ df['dF'] = pd.Series(dF_HadCM3.tolist())
 df['P'] = pd.Series(P_HadCM3.tolist())
 df['Ptrans'] = pd.Series(Ptrans_HadCM3.tolist())
 df['Gamma'] = pd.Series(gamma_HadCM3.tolist())
-df['ZMT'] = pd.Series(Data_HadCM3[0][:, 0].tolist())
-df['GMT'] = pd.Series(Data_HadCM3[1][:, 0].tolist())
-df.to_csv('Experiments/Output/' + run + '_conf1_abs.csv')
+df['ZMT'] = pd.Series(Data_HadCM3[0][:,0].tolist())
+df['GMT'] = pd.Series(Data_HadCM3[1][:,0].tolist())
+df.to_csv('Experiments/Output/'+run+'_conf1_abs.csv')
 
 P_config = df['P'].iloc[-1]
 
 ### Run LGM optimizations
 
-for run in ['LGM_forc', 'xmzkb', 'xmzkc']:
-    config_HadCM3 = importer('Experiments/HadCM3/' + Config_data[run])
-    # config_HadCM3 = overwrite_parameters(config_HadCM3,P_config,6,parameter_labels_6,parameter_levels_6)
+for run in ['LGM_forc','xmzkb','xmzkc']: 
 
-    parallel_config = {'number_of_parameters': 3, 'number_of_cycles': 1, 'number_of_parallels': 7}
-    variable_importer(config_HadCM3, initialZMT=False, parallel=True, parallel_config=parallel_config)
-    config_HadCM3, Sellers = add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,
-                                                   'ZOEE/config/SellersParameterization.ini', 4, 2, True, False)
-    elevation = -0.0065 * (np.array(Sellers[1][1]) + 125)
+    config_HadCM3=importer('Experiments/HadCM3/'+Config_data[run])
+    config_HadCM3 = overwrite_parameters(config_HadCM3,P_config,6,parameter_labels_6,parameter_levels_6)    
+
+    parallel_config = {'number_of_parameters': 3, 'number_of_cycles': 1,'number_of_parallels': 7}
+    variable_importer(config_HadCM3,initialZMT=False,parallel=True,parallel_config=parallel_config)
+    config_HadCM3,Sellers=add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,                                                'ZOEE/config/SellersParameterization.ini',4,2,True,False)
+    elevation=-0.0065*(np.array(Sellers[1][1])+125)
 
     """Import the class of your model that has to be defined in ZOEE.modules.optimization. And give it whatever 
     configuration it requires"""
-    ZOEE_HadCM3 = ZOEE_optimization(3, parameter_labels_3, parameter_levels_3, True, elevation, 'Coupled', runtime,
-                                    monthly=True)
-
-    # model_setup=[2,'ZMT',parameter_labels,parameter_levels,elevation,True]
+    if run =='xmzkb' or run=='xmzkc':
+        ZOEE_HadCM3 = ZOEE_optimization(3,parameter_labels_3,parameter_levels_3,True,elevation,'ZMT',runtime,monthly=True)
+    else:
+        ZOEE_HadCM3 = ZOEE_optimization(3,parameter_labels_3,parameter_levels_3,True,elevation,'Coupled',runtime,monthly=True)
+   
+    #model_setup=[2,'ZMT',parameter_labels,parameter_levels,elevation,True]
 
     """Execture optimize to start the optimization, giving it your model imported in the step before and configuration
     required to run your model"""
-    optimization_setup_3_LGM.target = {'ZMT': HadCM3_ZMT[run], 'GMT': HadCM3_GMT_anomaly[run][:runtime]}
+    
+    if run =='xmzkb' or run=='xmzkc':
+        optimization_setup_3_LGM.mode='ZMT'
+        optimization_setup_3_LGM.target=HadCM3_ZMT[run]
+    else:
+        optimization_setup_3_LGM.mode='Coupled'
+        optimization_setup_3_LGM.target={'ZMT':HadCM3_ZMT[run],'GMT':HadCM3_GMT_anomaly[run][:runtime]}
 
-    config_HadCM3['rk4input']['number_of_integration'] = int(runtime / 12000 * 365 * 1000)
+    config_HadCM3['rk4input']['number_of_integration']=int(runtime/12000 * 365*1000)
 
-    optimization_setup_3_LGM.P_initial = P_config
+    optimization_setup_3_LGM.P_initial=P_config
     print("Optimization >>> {}".format(run))
-    F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3 = optimization_setup_3_LGM.optimize(
-        ZOEE_HadCM3, config_HadCM3)
+    F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3=    optimization_setup_3_LGM.optimize(ZOEE_HadCM3,config_HadCM3)
 
     df = pd.DataFrame()
     df['F'] = pd.Series(F_HadCM3.tolist())
@@ -218,8 +219,11 @@ for run in ['LGM_forc', 'xmzkb', 'xmzkc']:
     df['P'] = pd.Series(P_HadCM3.tolist())
     df['Ptrans'] = pd.Series(Ptrans_HadCM3.tolist())
     df['Gamma'] = pd.Series(gamma_HadCM3.tolist())
-    df['ZMT'] = pd.Series(Data_HadCM3[0][:, 0].tolist())
-    df['GMT'] = pd.Series(Data_HadCM3[1][:,0].tolist())
+    if run =='xmzkb' or run=='xmzkc':
+        df['ZMT'] = pd.Series(Data_HadCM3[:,0].tolist())
+    else:
+        df['ZMT'] = pd.Series(Data_HadCM3[0][:,0].tolist())
+        df['GMT'] = pd.Series(Data_HadCM3[1][:,0].tolist())
     df.to_csv('Experiments/Output/'+run+'_conf1_abs.csv')
 
 
@@ -235,25 +239,23 @@ run='pi_forc'
 config_HadCM3=importer('Experiments/HadCM3/'+Config_data[run])
 parallel_config = {'number_of_parameters': 6, 'number_of_cycles': 1,'number_of_parallels': 13}
 variable_importer(config_HadCM3,initialZMT=False,parallel=True,parallel_config=parallel_config)
-config_HadCM3,Sellers=add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,                                            'ZOEE/config/SellersParameterization.ini', 4, 2, True, False)
-elevation = -0.0065 * np.array(Sellers[1][1])
+config_HadCM3,Sellers=add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,                                            'ZOEE/config/SellersParameterization.ini',4,2,True,False)
+elevation=-0.0065*np.array(Sellers[1][1])
 
 """Import the class of your model that has to be defined in ZOEE.modules.optimization. And give it whatever 
 configuration it requires"""
-ZOEE_HadCM3 = ZOEE_optimization(6, parameter_labels_6, parameter_levels_6, True, elevation, 'Coupled', runtime,
-                                monthly=True)
+ZOEE_HadCM3 = ZOEE_optimization(6,parameter_labels_6,parameter_levels_6,True,elevation,'Coupled',runtime,monthly=True)
 
-# model_setup=[2,'ZMT',parameter_labels,parameter_levels,elevation,True]
+#model_setup=[2,'ZMT',parameter_labels,parameter_levels,elevation,True]
 
 """Execture optimize to start the optimization, giving it your model imported in the step before and configuration
 required to run your model"""
-optimization_setup_6_an.target = {'ZMT': HadCM3_ZMT_anomaly[run], 'GMT': HadCM3_GMT_anomaly[run][:runtime]}
+optimization_setup_6_an.target={'ZMT':HadCM3_ZMT_anomaly[run],'GMT':HadCM3_GMT_anomaly[run][:runtime]}
 
-config_HadCM3['rk4input']['number_of_integration'] = int(runtime / 12000 * 365 * 1000)
+config_HadCM3['rk4input']['number_of_integration']=int(runtime/12000 * 365*1000)
 
 print("Optimization >>> {}".format(run))
-F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3 = optimization_setup_6_an.optimize(ZOEE_HadCM3,
-                                                                                                           config_HadCM3)
+F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3=optimization_setup_6_an.optimize(ZOEE_HadCM3,config_HadCM3)
 
 df = pd.DataFrame()
 df['F'] = pd.Series(F_HadCM3.tolist())
@@ -261,41 +263,48 @@ df['dF'] = pd.Series(dF_HadCM3.tolist())
 df['P'] = pd.Series(P_HadCM3.tolist())
 df['Ptrans'] = pd.Series(Ptrans_HadCM3.tolist())
 df['Gamma'] = pd.Series(gamma_HadCM3.tolist())
-df['ZMT'] = pd.Series(Data_HadCM3[0][:, 0].tolist())
-df['GMT'] = pd.Series(Data_HadCM3[1][:, 0].tolist())
-df.to_csv('Experiments/Output/' + run + '_conf1_an.csv')
+df['ZMT'] = pd.Series(Data_HadCM3[0][:,0].tolist())
+df['GMT'] = pd.Series(Data_HadCM3[1][:,0].tolist())
+df.to_csv('Experiments/Output/'+run+'_conf1_an.csv')
 
 P_config = df['P'].iloc[-1]
 
 ### Run LGM optimizations
 
-for run in ['LGM_forc', 'xmzkb', 'xmzkc']:
-    config_HadCM3 = importer('Experiments/HadCM3/' + Config_data[run])
-    # config_HadCM3 = overwrite_parameters(config_HadCM3,P_config,6,parameter_labels_6,parameter_levels_6)
+for run in ['LGM_forc','xmzkb','xmzkc']: 
 
-    parallel_config = {'number_of_parameters': 3, 'number_of_cycles': 1, 'number_of_parallels': 7}
-    variable_importer(config_HadCM3, initialZMT=False, parallel=True, parallel_config=parallel_config)
-    config_HadCM3, Sellers = add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,
-                                                   'ZOEE/config/SellersParameterization.ini', 4, 2, True, False)
-    elevation = -0.0065 * (np.array(Sellers[1][1]) + 125)
+    config_HadCM3=importer('Experiments/HadCM3/'+Config_data[run])
+    config_HadCM3 = overwrite_parameters(config_HadCM3,P_config,6,parameter_labels_6,parameter_levels_6)
+
+    
+    parallel_config = {'number_of_parameters': 3, 'number_of_cycles': 1,'number_of_parallels': 7}
+    variable_importer(config_HadCM3,initialZMT=False,parallel=True,parallel_config=parallel_config)
+    config_HadCM3,Sellers=add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,                                                'ZOEE/config/SellersParameterization.ini',4,2,True,False)
+    elevation=-0.0065*(np.array(Sellers[1][1])+125)
 
     """Import the class of your model that has to be defined in ZOEE.modules.optimization. And give it whatever 
     configuration it requires"""
-    ZOEE_HadCM3 = ZOEE_optimization(3, parameter_labels_3, parameter_levels_3, True, elevation, 'Coupled', runtime,
-                                    monthly=True)
-
-    # model_setup=[2,'ZMT',parameter_labels,parameter_levels,elevation,True]
+    if run =='xmzkb' or run=='xmzkc':
+        ZOEE_HadCM3 = ZOEE_optimization(3,parameter_labels_3,parameter_levels_3,True,elevation,'ZMT',runtime,monthly=True)
+    else:
+        ZOEE_HadCM3 = ZOEE_optimization(3,parameter_labels_3,parameter_levels_3,True,elevation,'Coupled',runtime,monthly=True)
+   
+    #model_setup=[2,'ZMT',parameter_labels,parameter_levels,elevation,True]
 
     """Execture optimize to start the optimization, giving it your model imported in the step before and configuration
     required to run your model"""
-    optimization_setup_3_LGM_an.target = {'ZMT': HadCM3_ZMT_anomaly[run], 'GMT': HadCM3_GMT_anomaly[run][:runtime]}
+    if run =='xmzkb' or run=='xmzkc':
+        optimization_setup_3_LGM_an.mode='ZMT'
+        optimization_setup_3_LGM_an.target=HadCM3_ZMT_anomaly[run]
+    else:
+        optimization_setup_3_LGM_an.mode='Coupled'
+        optimization_setup_3_LGM_an.target={'ZMT':HadCM3_ZMT_anomaly[run],'GMT':HadCM3_GMT_anomaly[run][:runtime]}
 
-    config_HadCM3['rk4input']['number_of_integration'] = int(runtime / 12000 * 365 * 1000)
+    config_HadCM3['rk4input']['number_of_integration']=int(runtime/12000 * 365*1000)
 
-    optimization_setup_3_LGM_an.P_initial = P_config
+    optimization_setup_3_LGM_an.P_initial=P_config
     print("Optimization >>> {}".format(run))
-    F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3 = optimization_setup_3_LGM_an.optimize(
-        ZOEE_HadCM3, config_HadCM3)
+    F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3=    optimization_setup_3_LGM_an.optimize(ZOEE_HadCM3,config_HadCM3)
 
     df = pd.DataFrame()
     df['F'] = pd.Series(F_HadCM3.tolist())
@@ -303,8 +312,11 @@ for run in ['LGM_forc', 'xmzkb', 'xmzkc']:
     df['P'] = pd.Series(P_HadCM3.tolist())
     df['Ptrans'] = pd.Series(Ptrans_HadCM3.tolist())
     df['Gamma'] = pd.Series(gamma_HadCM3.tolist())
-    df['ZMT'] = pd.Series(Data_HadCM3[0][:, 0].tolist())
-    df['GMT'] = pd.Series(Data_HadCM3[1][:,0].tolist())
+    if run =='xmzkb' or run=='xmzkc':
+        df['ZMT'] = pd.Series(Data_HadCM3[:,0].tolist())
+    else:
+        df['ZMT'] = pd.Series(Data_HadCM3[0][:,0].tolist())
+        df['GMT'] = pd.Series(Data_HadCM3[1][:,0].tolist())
     df.to_csv('Experiments/Output/'+run+'_conf1_an.csv')
 
 
@@ -320,26 +332,23 @@ run='LGM_forc'
 config_HadCM3=importer('Experiments/HadCM3/'+Config_data[run])
 parallel_config = {'number_of_parameters': 6, 'number_of_cycles': 1,'number_of_parallels': 13}
 variable_importer(config_HadCM3,initialZMT=False,parallel=True,parallel_config=parallel_config)
-config_HadCM3,Sellers=add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,                                            'ZOEE/config/SellersParameterization.ini', 4, 2, True,
-                                            False)
-elevation = -0.0065 * (np.array(Sellers[1][1]) + 125)
+config_HadCM3,Sellers=add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,                                            'ZOEE/config/SellersParameterization.ini',4,2,True,False)
+elevation=-0.0065*(np.array(Sellers[1][1])+125)
 
 """Import the class of your model that has to be defined in ZOEE.modules.optimization. And give it whatever 
 configuration it requires"""
-ZOEE_HadCM3 = ZOEE_optimization(6, parameter_labels_6, parameter_levels_6, True, elevation, 'Coupled', runtime,
-                                monthly=True)
+ZOEE_HadCM3 = ZOEE_optimization(6,parameter_labels_6,parameter_levels_6,True,elevation,'Coupled',runtime,monthly=True)
 
-# model_setup=[2,'ZMT',parameter_labels,parameter_levels,elevation,True]
+#model_setup=[2,'ZMT',parameter_labels,parameter_levels,elevation,True]
 
 """Execture optimize to start the optimization, giving it your model imported in the step before and configuration
 required to run your model"""
-optimization_setup_6_LGM.target = {'ZMT': HadCM3_ZMT[run], 'GMT': HadCM3_GMT_anomaly[run][:runtime]}
+optimization_setup_6_LGM.target={'ZMT':HadCM3_ZMT[run],'GMT':HadCM3_GMT_anomaly[run][:runtime]}
 
-config_HadCM3['rk4input']['number_of_integration'] = int(runtime / 12000 * 365 * 1000)
+config_HadCM3['rk4input']['number_of_integration']=int(runtime/12000 * 365*1000)
 
 print("Optimization >>> {}".format(run))
-F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3 = optimization_setup_6_LGM.optimize(ZOEE_HadCM3,
-                                                                                                            config_HadCM3)
+F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3=optimization_setup_6_LGM.optimize(ZOEE_HadCM3,config_HadCM3)
 
 df = pd.DataFrame()
 df['F'] = pd.Series(F_HadCM3.tolist())
@@ -347,41 +356,47 @@ df['dF'] = pd.Series(dF_HadCM3.tolist())
 df['P'] = pd.Series(P_HadCM3.tolist())
 df['Ptrans'] = pd.Series(Ptrans_HadCM3.tolist())
 df['Gamma'] = pd.Series(gamma_HadCM3.tolist())
-df['ZMT'] = pd.Series(Data_HadCM3[0][:, 0].tolist())
-df['GMT'] = pd.Series(Data_HadCM3[1][:, 0].tolist())
-df.to_csv('Experiments/Output/' + run + '_conf2_abs.csv')
+df['ZMT'] = pd.Series(Data_HadCM3[0][:,0].tolist())
+df['GMT'] = pd.Series(Data_HadCM3[1][:,0].tolist())
+df.to_csv('Experiments/Output/'+run+'_conf2_abs.csv')
 
 P_config = df['P'].iloc[-1]
 
 ### Run LGM pm optimizations
 
-for run in ['xmzkb', 'xmzkc']:
-    config_HadCM3 = importer('Experiments/HadCM3/' + Config_data[run])
-    # config_HadCM3 = overwrite_parameters(config_HadCM3,P_config,6,parameter_labels_6,parameter_levels_6)
+for run in ['xmzkb','xmzkc']: 
 
-    parallel_config = {'number_of_parameters': 3, 'number_of_cycles': 1, 'number_of_parallels': 7}
-    variable_importer(config_HadCM3, initialZMT=False, parallel=True, parallel_config=parallel_config)
-    config_HadCM3, Sellers = add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,
-                                                   'ZOEE/config/SellersParameterization.ini', 4, 2, True, False)
-    elevation = -0.0065 * (np.array(Sellers[1][1]) + 125)
+    config_HadCM3=importer('Experiments/HadCM3/'+Config_data[run])
+    config_HadCM3 = overwrite_parameters(config_HadCM3,P_config,6,parameter_labels_6,parameter_levels_6)
+        
+    parallel_config = {'number_of_parameters': 3, 'number_of_cycles': 1,'number_of_parallels': 7}
+    variable_importer(config_HadCM3,initialZMT=False,parallel=True,parallel_config=parallel_config)
+    config_HadCM3,Sellers=add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,                                                'ZOEE/config/SellersParameterization.ini',4,2,True,False)
+    elevation=-0.0065*(np.array(Sellers[1][1])+125)
 
     """Import the class of your model that has to be defined in ZOEE.modules.optimization. And give it whatever 
     configuration it requires"""
-    ZOEE_HadCM3 = ZOEE_optimization(3, parameter_labels_3, parameter_levels_3, True, elevation, 'Coupled', runtime,
-                                    monthly=True)
-
-    # model_setup=[2,'ZMT',parameter_labels,parameter_levels,elevation,True]
+    if run =='xmzkb' or run=='xmzkc':
+        ZOEE_HadCM3 = ZOEE_optimization(3,parameter_labels_3,parameter_levels_3,True,elevation,'ZMT',runtime,monthly=True)
+    else:
+        ZOEE_HadCM3 = ZOEE_optimization(3,parameter_labels_3,parameter_levels_3,True,elevation,'Coupled',runtime,monthly=True)
+   
+    #model_setup=[2,'ZMT',parameter_labels,parameter_levels,elevation,True]
 
     """Execture optimize to start the optimization, giving it your model imported in the step before and configuration
     required to run your model"""
-    optimization_setup_3_LGM.target = {'ZMT': HadCM3_ZMT[run], 'GMT': HadCM3_GMT_anomaly[run][:runtime]}
+    if run =='xmzkb' or run=='xmzkc':
+        optimization_setup_3_LGM.mode='ZMT'
+        optimization_setup_3_LGM.target=HadCM3_ZMT[run]
+    else:
+        optimization_setup_3_LGM.mode='Coupled'
+        optimization_setup_3_LGM.target={'ZMT':HadCM3_ZMT[run],'GMT':HadCM3_GMT_anomaly[run][:runtime]}
 
-    config_HadCM3['rk4input']['number_of_integration'] = int(runtime / 12000 * 365 * 1000)
+    config_HadCM3['rk4input']['number_of_integration']=int(runtime/12000 * 365*1000)
 
-    optimization_setup_3_LGM.P_initial = P_config
+    optimization_setup_3_LGM.P_initial=P_config
     print("Optimization >>> {}".format(run))
-    F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3 = optimization_setup_3_LGM.optimize(
-        ZOEE_HadCM3, config_HadCM3)
+    F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3=    optimization_setup_3_LGM.optimize(ZOEE_HadCM3,config_HadCM3)
 
     df = pd.DataFrame()
     df['F'] = pd.Series(F_HadCM3.tolist())
@@ -389,8 +404,11 @@ for run in ['xmzkb', 'xmzkc']:
     df['P'] = pd.Series(P_HadCM3.tolist())
     df['Ptrans'] = pd.Series(Ptrans_HadCM3.tolist())
     df['Gamma'] = pd.Series(gamma_HadCM3.tolist())
-    df['ZMT'] = pd.Series(Data_HadCM3[0][:, 0].tolist())
-    df['GMT'] = pd.Series(Data_HadCM3[1][:,0].tolist())
+    if run =='xmzkb' or run=='xmzkc':
+        df['ZMT'] = pd.Series(Data_HadCM3[:,0].tolist())
+    else:
+        df['ZMT'] = pd.Series(Data_HadCM3[0][:,0].tolist())
+        df['GMT'] = pd.Series(Data_HadCM3[1][:,0].tolist())
     df.to_csv('Experiments/Output/'+run+'_conf2_abs.csv')
 
 
@@ -404,26 +422,23 @@ run='LGM_forc'
 config_HadCM3=importer('Experiments/HadCM3/'+Config_data[run])
 parallel_config = {'number_of_parameters': 6, 'number_of_cycles': 1,'number_of_parallels': 13}
 variable_importer(config_HadCM3,initialZMT=False,parallel=True,parallel_config=parallel_config)
-config_HadCM3,Sellers=add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,                                            'ZOEE/config/SellersParameterization.ini', 4, 2, True,
-                                            False)
-elevation = -0.0065 * (np.array(Sellers[1][1]) + 125)
+config_HadCM3,Sellers=add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,                                            'ZOEE/config/SellersParameterization.ini',4,2,True,False)
+elevation=-0.0065*(np.array(Sellers[1][1])+125)
 
 """Import the class of your model that has to be defined in ZOEE.modules.optimization. And give it whatever 
 configuration it requires"""
-ZOEE_HadCM3 = ZOEE_optimization(6, parameter_labels_6, parameter_levels_6, True, elevation, 'Coupled', runtime,
-                                monthly=True)
+ZOEE_HadCM3 = ZOEE_optimization(6,parameter_labels_6,parameter_levels_6,True,elevation,'Coupled',runtime,monthly=True)
 
-# model_setup=[2,'ZMT',parameter_labels,parameter_levels,elevation,True]
+#model_setup=[2,'ZMT',parameter_labels,parameter_levels,elevation,True]
 
 """Execture optimize to start the optimization, giving it your model imported in the step before and configuration
 required to run your model"""
-optimization_setup_6_LGM_an.target = {'ZMT': HadCM3_ZMT[run], 'GMT': HadCM3_GMT_anomaly[run][:runtime]}
+optimization_setup_6_LGM_an.target={'ZMT':HadCM3_ZMT[run],'GMT':HadCM3_GMT_anomaly[run][:runtime]}
 
-config_HadCM3['rk4input']['number_of_integration'] = int(runtime / 12000 * 365 * 1000)
+config_HadCM3['rk4input']['number_of_integration']=int(runtime/12000 * 365*1000)
 
 print("Optimization >>> {}".format(run))
-F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3 = optimization_setup_6_LGM_an.optimize(
-    ZOEE_HadCM3, config_HadCM3)
+F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3=optimization_setup_6_LGM_an.optimize(ZOEE_HadCM3,config_HadCM3)
 
 df = pd.DataFrame()
 df['F'] = pd.Series(F_HadCM3.tolist())
@@ -431,41 +446,47 @@ df['dF'] = pd.Series(dF_HadCM3.tolist())
 df['P'] = pd.Series(P_HadCM3.tolist())
 df['Ptrans'] = pd.Series(Ptrans_HadCM3.tolist())
 df['Gamma'] = pd.Series(gamma_HadCM3.tolist())
-df['ZMT'] = pd.Series(Data_HadCM3[0][:, 0].tolist())
-df['GMT'] = pd.Series(Data_HadCM3[1][:, 0].tolist())
-df.to_csv('Experiments/Output/' + run + '_conf2_an.csv')
+df['ZMT'] = pd.Series(Data_HadCM3[0][:,0].tolist())
+df['GMT'] = pd.Series(Data_HadCM3[1][:,0].tolist())
+df.to_csv('Experiments/Output/'+run+'_conf2_an.csv')
 
 P_config = df['P'].iloc[-1]
 
 ### Run LGM pm optimizations
 
-for run in ['xmzkb', 'xmzkc']:
-    config_HadCM3 = importer('Experiments/HadCM3/' + Config_data[run])
-    # config_HadCM3 = overwrite_parameters(config_HadCM3,P_config,6,parameter_labels_6,parameter_levels_6)
+for run in ['xmzkb','xmzkc']: 
 
-    parallel_config = {'number_of_parameters': 3, 'number_of_cycles': 1, 'number_of_parallels': 7}
-    variable_importer(config_HadCM3, initialZMT=False, parallel=True, parallel_config=parallel_config)
-    config_HadCM3, Sellers = add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,
-                                                   'ZOEE/config/SellersParameterization.ini', 4, 2, True, False)
-    elevation = -0.0065 * (np.array(Sellers[1][1]) + 125)
+    config_HadCM3=importer('Experiments/HadCM3/'+Config_data[run])
+    config_HadCM3 = overwrite_parameters(config_HadCM3,P_config,6,parameter_labels_6,parameter_levels_6)
+        
+    parallel_config = {'number_of_parameters': 3, 'number_of_cycles': 1,'number_of_parallels': 7}
+    variable_importer(config_HadCM3,initialZMT=False,parallel=True,parallel_config=parallel_config)
+    config_HadCM3,Sellers=add_sellersparameters(config_HadCM3, parameterinterpolatorstepwise,                                                'ZOEE/config/SellersParameterization.ini',4,2,True,False)
+    elevation=-0.0065*(np.array(Sellers[1][1])+125)
 
     """Import the class of your model that has to be defined in ZOEE.modules.optimization. And give it whatever 
     configuration it requires"""
-    ZOEE_HadCM3 = ZOEE_optimization(3, parameter_labels_3, parameter_levels_3, True, elevation, 'Coupled', runtime,
-                                    monthly=True)
-
-    # model_setup=[2,'ZMT',parameter_labels,parameter_levels,elevation,True]
+    if run =='xmzkb' or run=='xmzkc':
+        ZOEE_HadCM3 = ZOEE_optimization(3,parameter_labels_3,parameter_levels_3,True,elevation,'ZMT',runtime,monthly=True)
+    else:
+        ZOEE_HadCM3 = ZOEE_optimization(3,parameter_labels_3,parameter_levels_3,True,elevation,'Coupled',runtime,monthly=True)
+   
+    #model_setup=[2,'ZMT',parameter_labels,parameter_levels,elevation,True]
 
     """Execture optimize to start the optimization, giving it your model imported in the step before and configuration
     required to run your model"""
-    optimization_setup_3_LGM_an.target = {'ZMT': HadCM3_ZMT_anomaly[run], 'GMT': HadCM3_GMT_anomaly[run][:runtime]}
+    if run =='xmzkb' or run=='xmzkc':
+        optimization_setup_3_LGM_an.mode='ZMT'
+        optimization_setup_3_LGM_an.target=HadCM3_ZMT_anomaly[run]
+    else:
+        optimization_setup_3_LGM_an.mode='Coupled'
+        optimization_setup_3_LGM_an.target={'ZMT':HadCM3_ZMT_anomaly[run],'GMT':HadCM3_GMT_anomaly[run][:runtime]}
 
-    config_HadCM3['rk4input']['number_of_integration'] = int(runtime / 12000 * 365 * 1000)
+    config_HadCM3['rk4input']['number_of_integration']=int(runtime/12000 * 365*1000)
 
-    optimization_setup_3_LGM_an.P_initial = P_config
+    optimization_setup_3_LGM_an.P_initial=P_config
     print("Optimization >>> {}".format(run))
-    F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3 = optimization_setup_3_LGM_an.optimize(
-        ZOEE_HadCM3, config_HadCM3)
+    F_HadCM3, dF_HadCM3, P_HadCM3, Ptrans_HadCM3, gamma_HadCM3, Data_HadCM3=    optimization_setup_3_LGM_an.optimize(ZOEE_HadCM3,config_HadCM3)
 
     df = pd.DataFrame()
     df['F'] = pd.Series(F_HadCM3.tolist())
@@ -473,8 +494,11 @@ for run in ['xmzkb', 'xmzkc']:
     df['P'] = pd.Series(P_HadCM3.tolist())
     df['Ptrans'] = pd.Series(Ptrans_HadCM3.tolist())
     df['Gamma'] = pd.Series(gamma_HadCM3.tolist())
-    df['ZMT'] = pd.Series(Data_HadCM3[0][:, 0].tolist())
-    df['GMT'] = pd.Series(Data_HadCM3[1][:,0].tolist())
+    if run =='xmzkb' or run=='xmzkc':
+        df['ZMT'] = pd.Series(Data_HadCM3[:,0].tolist())
+    else:
+        df['ZMT'] = pd.Series(Data_HadCM3[0][:,0].tolist())
+        df['GMT'] = pd.Series(Data_HadCM3[1][:,0].tolist())
     df.to_csv('Experiments/Output/'+run+'_conf2_an.csv')
 
 
