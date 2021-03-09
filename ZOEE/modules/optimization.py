@@ -162,6 +162,15 @@ class optimization:
             else:
                 gamma[i] = self._get_stepsize(dS[i - 1], dS[i], Ptrans[i - 1], Ptrans[i])
 
+	    if np.isnan(gamma[i]):
+                print('stop', i)
+                P = P[:i]
+                Ptrans = Ptrans[:i]
+                S = S[:i]
+                dS = dS[:i]
+                gamma = gamma[:i]
+                break
+
             # Calculate new parameters from gamma and costfunction gradient dF
             Ptrans_next = self._new_parameters(Ptrans[i], gamma[i], dS[i])
 
